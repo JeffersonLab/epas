@@ -1,0 +1,53 @@
+{
+    "name": "jlab/epas",
+    "description": "A package to aid in the local management of Plant Items that will be synchronized to ePAS.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Theo Larrieu",
+            "email": "theo@jlab.org"
+        }
+    ],
+    "homepage": "https://github.com/jlab/epas",
+    "keywords": ["Laravel", "Epas"],
+    "require": {
+        "illuminate/support": "~7|~8",
+        "laravel/scout": "^8.0",
+        "babenkoivan/elastic-scout-driver": "^1.0",
+        "babenkoivan/elastic-scout-driver-plus": "^1.0",
+        "rap2hpoutre/fast-excel": "^2.5",
+        "jlab/laravel-utilities": "^8.1",
+        "laravel/legacy-factories": "^1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~9.0",
+        "orchestra/testbench": "~5|~6",
+        "sti3bas/laravel-scout-array-driver": "^2.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Jlab\\Epas\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Jlab\\Epas\\Tests\\": "tests/"
+        }
+    },
+    "repositories": {
+        "laravel-utilities": {
+        "type": "vcs",
+        "url": "https://github.com/JeffersonLab/laravel-utilities.git"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Jlab\\Epas\\EpasServiceProvider"
+            ],
+            "aliases": {
+                "Epas": "Jlab\\Epas\\Facades\\Epas"
+            }
+        }
+    }
+}
