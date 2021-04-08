@@ -9,7 +9,6 @@ use Illuminate\Support\ServiceProvider;
 use Jlab\Epas\Console\Commands\UploadPlantItems;
 use Jlab\Epas\Model\PlantItem;
 use Jlab\Epas\Policies\PlantItemPolicy;
-use Jlab\Epas\Utility\PlantItemUtility;
 
 class EpasServiceProvider extends ServiceProvider
 {
@@ -20,12 +19,8 @@ class EpasServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'jlab');
-        // $this->loadViewsFrom(__DIR__.'/../resources/views', 'jlab');
-        // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        $this->publishMigrations();
-        $this->registerCommands();
         $this->loadRoutes();
+        $this->registerCommands();
         $this->registerPolicies();
 
         // Publishing is only necessary when using the CLI.
@@ -41,14 +36,17 @@ class EpasServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // mergeConfig allows the package to provide default values that the
+        // caller need only override selectively
+        // @see https://laravel.com/docs/8.x/packages#default-package-configuration
         $this->mergeConfigFrom(__DIR__.'/../config/epas.php', 'epas');
 
-//        // Register the service the package provides.
-//        $this->app->singleton('epas', function ($app) {
-//            return new Epas;
-//        });
     }
 
+    /**
+     * Publish the packages database migration files.
+     * @return void
+     */
     protected function publishMigrations(){
         if ($this->app->runningInConsole()) {
             // Export the migration
@@ -61,17 +59,37 @@ class EpasServiceProvider extends ServiceProvider
             }
     }
 
+    /**
+     * Publish the package's configuration files
+     * @return void
+     */
+    protected function publishConfig()
+    {
+        if ($this->app->runningInConsole()) {
+
+            $this->publishes([
+                __DIR__ . '/../config/epas.php' => config_path('epas.php'),
+            ], 'config');
+
+        }
+    }
+
+    /**
+     * Register the Artisan console commands provided by the package.
+     * @return void
+     */
     protected function registerCommands(){
         $this->commands([
             UploadPlantItems::class
         ]);
     }
+
     /**
      * Read in our HTTP routes from the appropriate files.
      */
     protected function loadRoutes(){
         // Must include the bindings middleware in order to get
-        // route model binding in a package like this.
+        // route model binding for routes provided via package like so.
         Route::group([
             'middleware' => [SubstituteBindings::class],
             'prefix' => 'api',
@@ -89,6 +107,9 @@ class EpasServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Register the authorization policy classes
+     */
     protected function registerPolicies(){
         Gate::policy(PlantItem::class, PlantItemPolicy::class);
     }
@@ -110,10 +131,8 @@ class EpasServiceProvider extends ServiceProvider
      */
     protected function bootForConsole(): void
     {
-        // Publishing the configuration file.
-        $this->publishes([
-            __DIR__.'/../config/epas.php' => config_path('epas.php'),
-        ], 'epas.config');
+        $this->publishConfig();
+        $this->publishMigrations();
 
         // Publishing the views.
         /*$this->publishes([

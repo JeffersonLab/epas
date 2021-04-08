@@ -76,7 +76,11 @@ php artisan  route:list --compact --path=api
 
 
 ## Configuration
+The package provides an *epas.php* config file which may be published and then edited.  Comments in the file describe the purpose of each option.
 
+```bash
+$ php artisan vendor:publish --provider="Jlab\Epas\EpasServiceProvider" --tag="config"
+```
 
 ## Artisan Commands
 The package provide an artisan console command to assist with importing plant items from a spreadsheet:
