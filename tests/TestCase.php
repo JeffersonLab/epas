@@ -49,5 +49,10 @@ class TestCase extends \Orchestra\Testbench\TestCase
             'prefix' => '',
         ]);
 
+        $app['path.public'] = realpath(__DIR__ . '/../public');
+
     }
+
+
+
 }

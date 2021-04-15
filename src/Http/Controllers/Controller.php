@@ -3,16 +3,14 @@
 namespace Jlab\Epas\Http\Controllers;
 
 
-use App\Http\Resources\DomainResource;
-use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
-use Atlis\Model\Domain;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Jlab\Epas\Http\Resources\UserResource;
 
 class Controller extends BaseController
 {
@@ -47,17 +45,6 @@ class Controller extends BaseController
         Inertia::share(['request' => $this->request->all()]);
     }
 
-    /**
-     * Provides domain as page data for use by inertia client.
-     *
-     * @param Domain $domain
-     */
-    protected function shareDomain(Domain $domain)
-    {
-        DomainResource::withoutWrapping();
-        $domainResource = new DomainResource($domain);
-        Inertia::share(['domain' => $domainResource]);
-    }
 
     /**
      * Return the API resource of the currently authenticated user.
