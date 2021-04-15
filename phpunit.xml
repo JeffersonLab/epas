@@ -7,6 +7,7 @@
   </coverage>
   <php>
     <env name="SCOUT_DRIVER" value="array"/>
+    <server name="SESSION_DRIVER" value="array"/>
   </php>
   <testsuites>
     <testsuite name="All">

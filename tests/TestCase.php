@@ -3,6 +3,7 @@
 namespace Jlab\Epas\Tests;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Inertia\ServiceProvider;
 use Jlab\Epas\EpasServiceProvider;
 use Jlab\Epas\Facades\Epas;
 use Jlab\LaravelUtilities\PackageServiceProvider;
@@ -22,7 +23,6 @@ class TestCase extends \Orchestra\Testbench\TestCase
         $this->withFactories($pathToFactories);
 
 
-
     }
 
     protected function getPackageProviders($app)
@@ -31,6 +31,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
             [
                 PackageServiceProvider::class,
                 EpasServiceProvider::class,
+                ServiceProvider::class,
             ];
     }
 

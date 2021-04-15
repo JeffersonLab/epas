@@ -3,10 +3,13 @@
 namespace Jlab\Epas;
 
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Inertia\Inertia;
 use Jlab\Epas\Console\Commands\UploadPlantItems;
+use Jlab\Epas\Http\Middleware\SetPlantItemRootView;
 use Jlab\Epas\Model\PlantItem;
 use Jlab\Epas\Policies\PlantItemPolicy;
 
@@ -19,9 +22,23 @@ class EpasServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadRoutes();
-        $this->registerCommands();
-        $this->registerPolicies();
+        $this->setupInertia();
+
+        $router = $this->app->make(Router::class);
+        //$router->pushMiddlewareToGroup('web', SetPlantItemRootView::class);
+
+        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'jlab-epas');
+
+        $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+        $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+
+
+
+
+
+        $this->declarePolicies();
+
+
 
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {
@@ -30,7 +47,7 @@ class EpasServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register any package services.
+     * Register package services.
      *
      * @return void
      */
@@ -43,86 +60,14 @@ class EpasServiceProvider extends ServiceProvider
 
     }
 
-    /**
-     * Publish the packages database migration files.
-     * @return void
-     */
-    protected function publishMigrations(){
-        if ($this->app->runningInConsole()) {
-            // Export the migration
-             $this->publishes([
-                    __DIR__ . '/../database/migrations/2021_00_00_000001_create_plant_items_table.php'
-                            => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_plant_items_table.php'),
-                    __DIR__ . '/../database/migrations/2021_00_00_000002_create_isolation_points_table.php'
-                 => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_isolation_points_table.php'),
-                ], 'migrations');
-            }
-    }
 
     /**
-     * Publish the package's configuration files
-     * @return void
+     * Declare the authorization policy classes
      */
-    protected function publishConfig()
-    {
-        if ($this->app->runningInConsole()) {
-
-            $this->publishes([
-                __DIR__ . '/../config/epas.php' => config_path('epas.php'),
-            ], 'config');
-
-        }
-    }
-
-    /**
-     * Register the Artisan console commands provided by the package.
-     * @return void
-     */
-    protected function registerCommands(){
-        $this->commands([
-            UploadPlantItems::class
-        ]);
-    }
-
-    /**
-     * Read in our HTTP routes from the appropriate files.
-     */
-    protected function loadRoutes(){
-        // Must include the bindings middleware in order to get
-        // route model binding for routes provided via package like so.
-        Route::group([
-            'middleware' => [SubstituteBindings::class],
-            'prefix' => 'api',
-            'namespace' => '',
-        ], function () {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
-        });
-
-        Route::group([
-            'middleware' => ['web', SubstituteBindings::class],
-            'prefix' => '',
-            'namespace' => '',
-        ], function () {
-            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
-        });
-    }
-
-    /**
-     * Register the authorization policy classes
-     */
-    protected function registerPolicies(){
+    protected function declarePolicies(){
         Gate::policy(PlantItem::class, PlantItemPolicy::class);
     }
 
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-//        return ['epas'];
-    }
 
     /**
      * Console-specific booting.
@@ -133,23 +78,70 @@ class EpasServiceProvider extends ServiceProvider
     {
         $this->publishConfig();
         $this->publishMigrations();
+        $this->publishResources();
 
-        // Publishing the views.
-        /*$this->publishes([
-            __DIR__.'/../resources/views' => base_path('resources/views/vendor/jlab'),
-        ], 'epas.views');*/
+        // declare package commands
+        $this->commands([
+            UploadPlantItems::class
+        ]);
+    }
+
+    private function setupInertia()
+    {
+//        Inertia::version(function () {
+//            // TODO
+//            if (config('app.env') == 'testing') {
+//                return;
+//            }
+//
+//            return md5_file(public_path('vendor/jlab-epas/mix-manifest.json'));
+//        });
+//
+//        Inertia::setRootView('jlab-epas::app');
+    }
+
+    /**
+     * Publish the package's javascript and css assets.
+     * @return void
+     */
+    protected function publishResources(){
+        // Export the resources
+        $this->publishes([
+            __DIR__ . '/../resources' => public_path('vendor/epas'),
+        ], 'jlab-epas-resources');
 
         // Publishing assets.
-        /*$this->publishes([
-            __DIR__.'/../resources/assets' => public_path('vendor/jlab'),
-        ], 'epas.views');*/
+        $this->publishes([
+            __DIR__ . '/../public/vendor/jlab-epas' => public_path('vendor/jlab-epas'),
+        ], ['jlab-epas', 'jlab-epas-assets']);
 
-        // Publishing the translation files.
-        /*$this->publishes([
-            __DIR__.'/../resources/lang' => resource_path('lang/vendor/jlab'),
-        ], 'epas.views');*/
+    }
 
-        // Registering package commands.
-        // $this->commands([]);
+
+    /**
+     * Publish the packages database migration files.
+     * @return void
+     */
+    protected function publishMigrations(){
+
+        // Export the migration
+        $this->publishes([
+            __DIR__ . '/../database/migrations/2021_00_00_000001_create_plant_items_table.php'
+            => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_plant_items_table.php'),
+            __DIR__ . '/../database/migrations/2021_00_00_000002_create_isolation_points_table.php'
+            => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_isolation_points_table.php'),
+        ], 'migrations');
+
+    }
+
+    /**
+     * Publish the package's configuration files
+     * @return void
+     */
+    protected function publishConfig()
+    {
+        $this->publishes([
+            __DIR__ . '/../config/epas.php' => config_path('epas.php'),
+        ], 'config');
     }
 }

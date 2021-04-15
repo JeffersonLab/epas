@@ -1,0 +1,32 @@
+
+// Bootstrap
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/bootstrap.scss";
+@import '~bootstrap-vue/src/index.scss';
+@import "~nprogress/nprogress.css";
+
+// FlatPickr date select widget
+@import '~flatpickr/dist/flatpickr.css';
+
+div.topbar {
+    min-height: 80px;
+    display: table;
+    width: 100%;
+}
+
+div.topbar div {
+    width: 50%;
+    display: table-cell;
+    vertical-align: middle;
+
+}
+img.logo{
+    padding-left: 5px;
+    padding-top: 2px;
+}
+p.nav-text {
+    text-align: right;
+    padding-right: 2em;
+}
+

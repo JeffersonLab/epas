@@ -74,6 +74,12 @@ php artisan  route:list --compact --path=api
 
 ```
 
+## Assets
+
+```bash
+php artisan vendor:publish --tag=jlab-epas-assets --force
+npm run dev  # or production, watch, etc.
+```
 
 ## Configuration
 The package provides an *epas.php* config file which may be published and then edited.  Comments in the file describe the purpose of each option.

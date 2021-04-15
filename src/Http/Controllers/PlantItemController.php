@@ -1,7 +1,305 @@
 <?php
 
+namespace Jlab\Epas\Http\Controllers;
 
-class PlantItemController
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\MessageBag;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
+use Jlab\Epas\Http\Middleware\SetPlantItemRootView;
+use Jlab\Epas\Http\Resources\PlantItemCollection;
+use Jlab\Epas\Http\Resources\PlantItemDetailResource;
+use Jlab\Epas\Model\PlantItem;
+use Jlab\Epas\Service\PlantItemSearch;
+use Rap2hpoutre\FastExcel\FastExcel;
+
+class PlantItemController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        parent::__construct($request);
+        $this->middleware('auth')->only(['create', 'upload', 'uploadForm']);
+        $this->middleware(SetPlantItemRootView::class);
+    }
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Inertia\Response
+     */
+    public function index()
+    {
+        //Inertia::setRootView('jlab-epas::app');
+        $itemCollection = PlantItem::where('plant_parent_id', 'FM-L-JLAB')
+            ->get()
+            ->sortBy(function ($item, $key) {
+                // Make parent items come first.
+                return $item->hasChildren() ? 1 : 2;
+            });
+
+        $resource = new PlantItemCollection($itemCollection);
+        $this->sharePlantItemFormFieldOptions();
+
+
+        return Inertia::render('Pages/PlantItemPage', [
+            'plantItems' => $resource->toArray(request())
+        ]);
+    }
+
+    /**
+     * Accept a spreadsheet upload
+     */
+    public function upload(Request $request)
+    {
+        try {
+            // Retrieves a Laravel File Upload object
+            $uploadedFile = $request->file('file');
+            $fileName = $uploadedFile->getClientOriginalName();
+
+            // If a file of the same name was already uploaded and
+            // the user didn't explicitly ask for replacement, it's an
+            // error that will abort processing.
+            if ($request->get('replaceOption', false) != 'replace') {
+                $this->assertFileNotAlreadyExist($fileName);
+            }
+
+            // Copy the file to the epas temp directory
+            $path = $request->file('file')->storeAs(
+                'epas/tmp', $fileName
+            );
+
+            // Prepare the arguments to be passed to Artisan command
+            $arguments = [
+                'file' => Storage::path($path),
+                '--plant-group' => $request->get('plantGroup', null)
+            ];
+            if ($request->get('replaceOption', false) == 'replace') {
+                $arguments['--replace'] = true;
+            }
+
+            // Here we re-use the same artisan command as via the command line
+            $exitCode = Artisan::call('plant-items:upload', $arguments);
+            if ($exitCode != 0) {
+                // For debugging purposes, we're not deleting the
+                // temp file right now when it contained errors.
+                // We're simply returning the error messages to the user.
+                //return $this->error(Artisan::output(), 422);
+                $errors = new MessageBag(['file' => Artisan::output()]);
+                return redirect(route('plant_items.upload_form'))
+                    ->withErrors($errors)
+                    ->withInput();
+            }
+
+            // Move the file from temp to actual storage
+            if (Storage::exists('epas/' . $fileName)) {
+                Storage::delete('epas/' . $fileName);
+            }
+            Storage::move('epas/tmp/' . $fileName, 'epas/' . $fileName);
+
+            // Give the user a thumbs-up
+            return redirect(route('plant_items.table', ['data_source' => $fileName]))->with('success',
+                'The spreadsheet was successfully uploaded.');
+        } catch (\Exception $e) {
+            $errors = new MessageBag(['form' => $e->getMessage()]);
+            return redirect(route('plant_items.upload_form'))
+                ->withErrors($errors)
+                ->withInput();
+        }
+    }
+
+    protected function assertFileNotAlreadyExist($file)
+    {
+        if (Storage::exists('epas/' . $file)) {
+            throw new \Exception ('A spreadsheet data source of the same name has already been uploaded.');
+        }
+    }
+
+    protected function excel(Request $request)
+    {
+        // Build a search object using the request
+        $search = new PlantItemSearch();
+        $search->limit = 100000;
+        $search->applyRequest($this->request);
+
+        // Build a collection of Plant Items
+        $models = new Collection($search->getResults());
+
+        return (new FastExcel($models))
+            ->download('plant_items.xlsx', function ($plantItem) {
+                return $plantItem->only($plantItem->getFillable());
+            });
+    }
+
+    protected function uploadForm()
+    {
+        return Inertia::render('Inertia/PlantItemUploadForm', [
+            'formFieldData' => $this->spreadsheetFormFieldData()
+        ]);
+
+    }
+
+    public function item(PlantItem $plantItem){
+        $this->sharePlantItemFormFieldOptions();
+        return Inertia::render('Inertia/PlantItem', [
+            'plantItem' => new PlantItemDetailResource($plantItem)
+        ]);
+    }
+
+    public function create(Request $request){
+        $this->sharePlantItemFormFieldOptions();
+        $plantItem = new PlantItem();
+        $this->fillWithValues($plantItem, $request->only('plantParentId'));
+        return Inertia::render('Inertia/PlantItemCreate', [
+            'plantItem' => new PlantItemDetailResource($plantItem)
+        ]);
+    }
+
+    /**
+     * Sets plant item properties with values
+     * @param PlantItem $plantItem
+     * @param array $values
+     * @return PlantItem
+     */
+    protected function fillWithValues(PlantItem $plantItem, array $values)
+    {
+        foreach ($values as $key => $value) {
+            $plantItem->{Str::snake($key)} = $value;
+        }
+        return $plantItem;
+    }
+
+    protected function table(Request $request)
+    {
+        $this->shareRequest();
+        $this->sharePlantItemFilters();
+
+        // Build a search object using the request
+        $search = new PlantItemSearch();
+        $search->applyRequest($this->request);
+
+        // Build a collection of Plant Items
+        $models = new Collection($search->getResults());
+
+        if ($models->count() >= $search->limit) {
+            Inertia::share([
+                'flash' => [
+                    'warning' => "Search results have been capped at {$search->limit} items. Narrow your results with filters or choose Download"
+                ]
+            ]);
+        }
+        $resource = PlantItemDetailResource::collection($models);
+        return Inertia::render('Inertia/PlantItemTable', [
+            'plantItems' => $resource->toArray(request()),
+        ]);
+    }
+
+
+    protected function sharePlantItemFilters()
+    {
+        Inertia::share([
+            'filters' => [
+                'dataSourceOptions' => array_merge([0 => ''], PlantItem::dataSources()->all()),
+            ]
+        ]);
+    }
+
+    protected function sharePlantItemFormFieldOptions()
+    {
+        Inertia::share([
+            'formFieldOptions' => $this->plantItemFormFieldOptions(),
+        ]);
+    }
+
+    /**
+     * Form element data for plant item edit/create form
+     * @return array[]
+     */
+    protected function plantItemFormFieldOptions()
+    {
+        return [
+            'plantGroupOptions' => $this->plantGroupOptions(),
+            'methodOfProvingOptions' =>  $this->methodOfProvingOptions(),
+            'circuitVoltageOptions' => $this->circuitVoltageOptions(),
+        ];
+    }
+
+    /**
+     * Form element data for plant item spreadsheet upload form
+     * @return array[]
+     */
+    protected function spreadsheetFormFieldData(){
+        return [
+            'plantGroupOptions' => $this->spreadsheetPlantGroupOptions(),
+            'replaceOptions' => $this->replaceOptions(),
+        ];
+    }
+
+    /**
+     * Options for specifying plant_group when uploading a spreadsheet.
+     *
+     * @return array
+     */
+    protected function spreadsheetPlantGroupOptions(){
+        $options[] = ['value' => 'spreadsheet', 'text' => 'From Spreadsheet'];
+        return array_merge($options, $this->plantGroupOptions());
+    }
+
+    /**
+     * Options for specifying plant_group.
+     *
+     * @return array
+     */
+    protected function plantGroupOptions()
+    {
+        $options = [];
+        foreach (config('epas.plant_groups') as $option) {
+            $options[] = ['value' => $option, 'text' => $option];
+        }
+        return $options;
+    }
+
+    /**
+     * Options for specifying method_of_proving
+     *
+     * @return array
+     */
+    protected function methodOfProvingOptions()
+    {
+
+        $options[] = ['value' => '', 'text' => ''];
+        foreach (config('epas.method_of_proving_description') as $key => $text){
+            $options[] = ['value' => $key, 'text' => $text];
+        }
+        return $options;
+    }
+
+    /**
+     * Options for specifying circuit_voltage
+     *
+     * @return array
+     */
+    protected function circuitVoltageOptions()
+    {
+        $options[] = ['value' => '', 'text' => ''];
+        foreach (config('epas.circuit_voltage') as $key){
+            $options[] = ['value' => $key, 'text' => $key];
+        }
+        return $options;
+    }
+
+    /**
+     * Spreadsheet data source overwriting options.
+     * @return \string[][]
+     */
+    protected function replaceOptions()
+    {
+        return [
+            ['value' => 'keep', 'text' => 'Do Not Replace'],
+            ['value' => 'replace', 'text' => 'Replace Spreadsheet']
+        ];
+    }
 }
