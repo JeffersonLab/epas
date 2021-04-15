@@ -3,6 +3,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Root Plant Item
+    |--------------------------------------------------------------------------
+    |
+    | Specify the PlantId that will be the starting point for display of the plant
+    | items hierarchy.  Its children will be displayed as root nodes.
+    |
+    */
+    'root_plant_item' => 'FM-L-JLAB',
+
+    /*
+    |--------------------------------------------------------------------------
     | Root View for Inertia Components
     |--------------------------------------------------------------------------
     |

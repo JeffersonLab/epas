@@ -34,7 +34,7 @@ class PlantItemController extends Controller
     public function index()
     {
         //Inertia::setRootView('jlab-epas::app');
-        $itemCollection = PlantItem::where('plant_parent_id', 'FM-L-JLAB')
+        $itemCollection = PlantItem::where('plant_parent_id', config('epas.root_plant_item'))
             ->get()
             ->sortBy(function ($item, $key) {
                 // Make parent items come first.
