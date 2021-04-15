@@ -15,6 +15,7 @@ class PlantItemPageTest extends HttpTestCase
         $response = $this->get(route('plant_items.index'));
         $response->assertStatus(200);
 
+        // @see https://github.com/claudiodekker/inertia-laravel-testing/tree/2.0.0
         $response->assertInertia(function (Assert $page) {
             $page->has('plantItems')
                 ->has('formFieldOptions')

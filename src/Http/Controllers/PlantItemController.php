@@ -136,7 +136,7 @@ class PlantItemController extends Controller
 
     protected function uploadForm()
     {
-        return Inertia::render('Inertia/PlantItemUploadForm', [
+        return Inertia::render('Pages/PlantItemUploadForm', [
             'formFieldData' => $this->spreadsheetFormFieldData()
         ]);
 
@@ -144,7 +144,7 @@ class PlantItemController extends Controller
 
     public function item(PlantItem $plantItem){
         $this->sharePlantItemFormFieldOptions();
-        return Inertia::render('Inertia/PlantItem', [
+        return Inertia::render('Pages/PlantItem', [
             'plantItem' => new PlantItemDetailResource($plantItem)
         ]);
     }
@@ -153,7 +153,7 @@ class PlantItemController extends Controller
         $this->sharePlantItemFormFieldOptions();
         $plantItem = new PlantItem();
         $this->fillWithValues($plantItem, $request->only('plantParentId'));
-        return Inertia::render('Inertia/PlantItemCreate', [
+        return Inertia::render('Pages/PlantItemCreate', [
             'plantItem' => new PlantItemDetailResource($plantItem)
         ]);
     }
@@ -192,7 +192,7 @@ class PlantItemController extends Controller
             ]);
         }
         $resource = PlantItemDetailResource::collection($models);
-        return Inertia::render('Inertia/PlantItemTable', [
+        return Inertia::render('Pages/PlantItemTable', [
             'plantItems' => $resource->toArray(request()),
         ]);
     }
