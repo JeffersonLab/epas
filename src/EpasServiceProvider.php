@@ -107,12 +107,12 @@ class EpasServiceProvider extends ServiceProvider
     protected function publishResources(){
         // Export the resources
         $this->publishes([
-            __DIR__ . '/../resources' => public_path('vendor/epas'),
+            __DIR__ . '/../resources' => resource_path('vendor/jlab-epas'),
         ], 'jlab-epas-resources');
 
         // Publishing assets.
         $this->publishes([
-            __DIR__ . '/../public/vendor/jlab-epas' => public_path('vendor/jlab-epas'),
+            __DIR__ . '/../public' => public_path('vendor/jlab-epas'),
         ], ['jlab-epas', 'jlab-epas-assets']);
 
     }
