@@ -22,7 +22,6 @@ class EpasServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->setupInertia();
 
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'jlab-epas');
 
