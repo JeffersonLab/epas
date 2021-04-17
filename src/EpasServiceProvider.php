@@ -24,21 +24,18 @@ class EpasServiceProvider extends ServiceProvider
     {
         $this->setupInertia();
 
-        $router = $this->app->make(Router::class);
-        //$router->pushMiddlewareToGroup('web', SetPlantItemRootView::class);
-
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'jlab-epas');
 
         $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
 
-
-
-
+        // Declare package commands here so they can be called via web and not
+        // just via console as would be the case if placed in bootForConsole().
+        $this->commands([
+            UploadPlantItems::class
+        ]);
 
         $this->declarePolicies();
-
-
 
         // Publishing is only necessary when using the CLI.
         if ($this->app->runningInConsole()) {
@@ -80,25 +77,8 @@ class EpasServiceProvider extends ServiceProvider
         $this->publishMigrations();
         $this->publishResources();
 
-        // declare package commands
-        $this->commands([
-            UploadPlantItems::class
-        ]);
     }
 
-    private function setupInertia()
-    {
-//        Inertia::version(function () {
-//            // TODO
-//            if (config('app.env') == 'testing') {
-//                return;
-//            }
-//
-//            return md5_file(public_path('vendor/jlab-epas/mix-manifest.json'));
-//        });
-//
-//        Inertia::setRootView('jlab-epas::app');
-    }
 
     /**
      * Publish the package's javascript and css assets.
