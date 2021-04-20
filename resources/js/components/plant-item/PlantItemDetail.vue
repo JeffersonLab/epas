@@ -206,7 +206,7 @@ export default {
         },
         // Call API to persist deletion
         deleteItem() {
-            let url = this.route('api.plant_items.delete',[this.plantItem.id], false).url()
+            let url = this.route('api.plant_items.delete',[this.plantItem.id], false)
             this.$http.delete(url)
                 .then((result) => {      // success
                     this.$bvToast.toast('Plant item was deleted', {title: 'Success', variant: 'success'})
