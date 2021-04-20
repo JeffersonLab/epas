@@ -21,6 +21,7 @@ class UploadPlantItems extends Command
                             {--plant-group= : plant group name to use}
                             {--progress-bar : show progress bar on CLI}
                             {--replace : delete any existing rows spreadsheet of same name}
+                            {--update : update existing plantids}
                             {file : path to valid excel .xlsx file}';
 
     /**
@@ -92,7 +93,6 @@ class UploadPlantItems extends Command
             $bar->start();
         }
         foreach ($items as $item) {
-            //$this->line($item->isolation_point_plant_id,'');
             $row++;
             if (! $item->validate()){
                 foreach ($item->errors()->all() as $message){
@@ -124,7 +124,11 @@ class UploadPlantItems extends Command
             if ($this->option('replace')){
                 $deletedRCount = PlantItem::where('data_source',$this->dataSource)->delete();
             }
-            $this->insert($items);
+            if ($this->option('update')) {
+                $this->update($items);
+            }else{
+                $this->insert($items);
+            }
             $this->audit($items);
             DB::commit();
         }catch(\Exception $e){
@@ -136,8 +140,8 @@ class UploadPlantItems extends Command
 
 
     /**
-     * Perform model self-validation on the models prior to
-     * their insertion in the database.
+     * Inserts models.
+     * Generates error messages if a model already exists.
      * @param $items
      */
     protected function insert(Collection $items){
@@ -149,16 +153,11 @@ class UploadPlantItems extends Command
         foreach ($items as $item) {
             $row++;
             try{
-                if (! $item->save()){
+                if (! $this->saveOne($item)){
                     $this->errors->add("row $row ", "insert failed.");
                 }
             }catch (\Exception $e){
-                if ($e->getCode() === 1){
-                    $message = "Plant ID \"{$item->plant_id}\" is a duplicate or already exists";
-                }else{
-                    $message = $e->getMessage();
-                }
-                $this->errors->add("row $row ", $message);
+                $this->errors->add("row $row ", $e->getMessage());
             }
             if ($this->progressBar) { $bar->advance();}
         }
@@ -169,6 +168,73 @@ class UploadPlantItems extends Command
         if ($this->errors->isNotEmpty()){
             $this->displayErrors();
             throw new \Exception("One or more rows could not be inserted into the database.  No changes were saved.");
+        }
+    }
+
+    /**
+     * Updates or Inserts models.
+     *
+     * @param $items
+     */
+    protected function update(Collection $items){
+        $row = 1;
+        if ($this->progressBar) {
+            $bar = $this->output->createProgressBar($items->count());
+            $bar->start();
+        }
+        foreach ($items as $item) {
+            $row++;
+            try{
+                $mergedItem = $this->mergeWithExisting($item);
+                if (! $this->saveOne($mergedItem)){
+                    $this->errors->add("row $row ", "save failed.");
+                }
+                $item = $mergedItem;
+            }catch (\Exception $e){
+                $this->errors->add("row $row ", $e->getMessage());
+            }
+            if ($this->progressBar) { $bar->advance();}
+        }
+        if ($this->progressBar) {
+            $bar->finish();
+            $this->newLine();
+        }
+        if ($this->errors->isNotEmpty()){
+            $this->displayErrors();
+            throw new \Exception("One or more rows could not be inserted into the database.  No changes were saved.");
+        }
+    }
+
+    /**
+     * Merges item's properties with those of an existing matching plant item from DB.
+     *
+     * Returns original if no matching DB item was found.
+     *
+     * @param $item
+     */
+    protected function mergeWithExisting(PlantItem $item){
+        $targetItem = PlantItem::firstOrNew(['plant_id' => $item->plant_id]);
+        $targetItem->fill($item->attributesToArray());
+        return $targetItem;
+    }
+
+    /**
+     * save (insert or update) a single plant item.
+     *
+     * @param $item
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function saveOne($item){
+        try{
+            return $item->save();
+        }catch (\Exception $e){
+            if ($e->getCode() === 1){
+                $message = "Plant ID \"{$item->plant_id}\" is a duplicate or already exists";
+            }else{
+                $message = $e->getMessage();
+            }
+            throw new \Exception($message);
         }
     }
 
@@ -214,14 +280,16 @@ class UploadPlantItems extends Command
         }
         foreach ($items as $item) {
             try {
+                $plantItem = PlantItem::where('plant_id',$item->plant_id)->first();
                 if ($item->isolation_point_plant_id) {
                     $isolationPoint = PlantItem::where('plant_id', strtoupper($item->isolation_point_plant_id))->first();
                     if (!$isolationPoint) {
                         $message = "Isolation Point Plant ID \"{$item->isolation_point_plant_id}\" does not exist";
-                        $this->errors->add("row $row ", $message);
+                        throw new \Exception($message);
                     }
-                    $item->isolationPoints()->attach($isolationPoint);
+                    $plantItem->isolationPoints()->sync([$isolationPoint->id]);
                 }
+
             }catch (\Exception $e){
                 $this->errors->add("row $row ", $e->getMessage());
             }
@@ -237,7 +305,6 @@ class UploadPlantItems extends Command
             throw new \Exception("Unable to associate one or more isolation points");
         }
     }
-
 
 
     /**
