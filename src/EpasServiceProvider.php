@@ -91,7 +91,7 @@ class EpasServiceProvider extends ServiceProvider
 
         // Publishing assets.
         $this->publishes([
-            __DIR__ . '/../public' => public_path('vendor/jlab-epas'),
+            __DIR__ . '/../public/vendor/jlab-epas' => public_path('vendor/jlab-epas'),
         ], ['jlab-epas', 'jlab-epas-assets']);
 
     }

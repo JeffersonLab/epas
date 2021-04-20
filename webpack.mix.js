@@ -6,7 +6,6 @@ mix.setPublicPath('public/vendor/jlab-epas')
     .sass('resources/css/app.scss', 'css/')
     .webpackConfig({
         output: {
-            publicPath: '/vendor/jlab-epas/',
             chunkFilename: 'js/[name].js?id=[chunkhash]'
         },
         resolve: {
