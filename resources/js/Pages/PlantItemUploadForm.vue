@@ -72,10 +72,10 @@
             </div>
             <div class="col">
                 <h2>Options Help</h2>
-                <dt>Do Not Replace</dt>
-                <dd>If the spreadsheet name matches one that already exists or contains any plant_id values that already exist, the file will be rejected.</dd>
-                <dt>Replace Spreadsheet</dt>
-                <dd>Any plant items whose data source matches the current spreadsheet file name will be removed and then the contents of the current spreadsheet will be added in their place.</dd>
+                <dt>Do Not Update</dt>
+                <dd>If the spreadsheet contains any plant_id values that already exist, the file will be rejected.</dd>
+                <dt>Update Plant Items</dt>
+                <dd>If a plant_id value found in the spreadsheet already exists in the database, the database row will be updated with data attributes from the matching spreadsheet plant item row.</dd>
             </div>
         </div>
             <hr />

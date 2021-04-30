@@ -58,7 +58,7 @@ class PlantItemController extends Controller
         try {
             // Retrieves a Laravel File Upload object
             $uploadedFile = $request->file('file');
-            $fileName = $uploadedFile->getClientOriginalName();
+            $fileName = $this->uniqueFileName($uploadedFile->getClientOriginalName());
 
             // If a file of the same name was already uploaded and
             // the user didn't explicitly ask for replacement, it's an
@@ -77,8 +77,9 @@ class PlantItemController extends Controller
                 'file' => Storage::path($path),
                 '--plant-group' => $request->get('plantGroup', null)
             ];
-            if ($request->get('replaceOption', false) == 'replace') {
-                $arguments['--replace'] = true;
+
+            if ($request->get('replaceOption', false) == 'update') {
+                $arguments['--update'] = true;
             }
 
             // Here we re-use the same artisan command as via the command line
@@ -94,10 +95,6 @@ class PlantItemController extends Controller
                     ->withInput();
             }
 
-            // Move the file from temp to actual storage
-            if (Storage::exists('epas/' . $fileName)) {
-                Storage::delete('epas/' . $fileName);
-            }
             Storage::move('epas/tmp/' . $fileName, 'epas/' . $fileName);
 
             // Give the user a thumbs-up
@@ -116,6 +113,39 @@ class PlantItemController extends Controller
         if (Storage::exists('epas/' . $file)) {
             throw new \Exception ('A spreadsheet data source of the same name has already been uploaded.');
         }
+    }
+
+    /**
+     * Returns a filename that doesn't already exist, but is recognizable derived
+     * from the original.
+     *
+     * @param $file
+     * @return string
+     */
+    protected function uniqueFileName($file){
+        $version = 0;
+        $fileName = $file;
+        while (Storage::exists('epas/' . $fileName)) {
+            $version ++;
+            $fileName = $this->versionedFileName($file, $version);
+        }
+        return $fileName;
+    }
+
+    /**
+     * Obtain a file name with _$version before the suffix
+     * ex: file.xlsx => file_1.xlsx
+     *
+     * @param $file
+     * @param $version
+     * @return string
+     */
+    protected function versionedFileName($file, $version){
+        $fileParts = pathinfo($file);
+        if ($version){
+            return $fileParts['basename']."_$version.".$fileParts['extension'];
+        }
+        return $file;
     }
 
     protected function excel(Request $request)
@@ -298,8 +328,8 @@ class PlantItemController extends Controller
     protected function replaceOptions()
     {
         return [
-            ['value' => 'keep', 'text' => 'Do Not Replace'],
-            ['value' => 'replace', 'text' => 'Replace Spreadsheet']
+            ['value' => 'keep', 'text' => 'Do Not Update'],
+            ['value' => 'update', 'text' => 'Update Plant Items']
         ];
     }
 }
