@@ -93,6 +93,14 @@ class PlantItem extends BaseModel
 
 
     /**
+    * Default values for attributes
+    * @var  array
+    */
+    protected $attributes = [
+        'is_plant_item' => 1,
+    ];
+
+    /**
      * Validation rules
      * @see http://laravel.com/docs/5.0/validation
      * @var array
