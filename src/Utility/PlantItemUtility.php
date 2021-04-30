@@ -31,7 +31,9 @@ class PlantItemUtility
     {
         $collection = new Collection();
         foreach (static::readFromSpreadsheet($file) as $record) {
-
+            if (static::looksLikeBlankRow($record)){
+                continue;
+            }
             try {
                 $plantItem = new PlantItem($record);
                 $plantItem->data_source = basename($file);
@@ -73,6 +75,15 @@ class PlantItemUtility
             $processed = static::normalizeBooleans($processed);
             return $processed;
         });
+    }
+
+    /**
+     * Answers whether the record looks like it was read from a blank row.
+     * @param array $record
+     * @return boolean
+     */
+    protected static function looksLikeBlankRow(array $record){
+        return empty($record['plant_id']) && empty($record['plant_id']) && empty($record['description']);
     }
 
     /**
