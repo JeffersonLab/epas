@@ -108,7 +108,7 @@ class EpasServiceProvider extends ServiceProvider
             __DIR__ . '/../database/migrations/2021_00_00_000001_create_plant_items_table.php'
             => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_plant_items_table.php'),
             __DIR__ . '/../database/migrations/2021_00_00_000002_create_isolation_points_table.php'
-            => database_path('migrations/' . date('Y_m_d_His', time()) . '_create_isolation_points_table.php'),
+            => database_path('migrations/' . date('Y_m_d_His', time()+1) . '_create_isolation_points_table.php'),
         ], 'migrations');
 
     }
