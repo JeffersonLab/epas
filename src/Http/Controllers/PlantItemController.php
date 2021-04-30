@@ -10,11 +10,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Jlab\Epas\Exports\PlantItemExport;
 use Jlab\Epas\Http\Middleware\SetPlantItemRootView;
 use Jlab\Epas\Http\Resources\PlantItemCollection;
 use Jlab\Epas\Http\Resources\PlantItemDetailResource;
 use Jlab\Epas\Model\PlantItem;
 use Jlab\Epas\Service\PlantItemSearch;
+use Maatwebsite\Excel\Facades\Excel;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 class PlantItemController extends Controller
@@ -150,18 +152,8 @@ class PlantItemController extends Controller
 
     protected function excel(Request $request)
     {
-        // Build a search object using the request
-        $search = new PlantItemSearch();
-        $search->limit = 100000;
-        $search->applyRequest($this->request);
+        return Excel::download(new PlantItemExport($request), 'items.xlsx');
 
-        // Build a collection of Plant Items
-        $models = new Collection($search->getResults());
-
-        return (new FastExcel($models))
-            ->download('plant_items.xlsx', function ($plantItem) {
-                return $plantItem->only($plantItem->getFillable());
-            });
     }
 
     protected function uploadForm()
