@@ -11,10 +11,16 @@ use Rap2hpoutre\FastExcel\FastExcel;
 
 class PlantItemUtility
 {
-    // Maps headings that we expect to encounter into their acceptable
-    // equivalent.  This only needed for cases where the default
-    // snake_case conversion algorithm is insufficient.
-    public $headingFixes = [];
+    /**
+     * Maps headings that we expect to encounter into their acceptable
+     * equivalent.  This only needed for cases where the default
+     * snake_case conversion algorithm is insufficient.
+     * Both the key and value of the array should be snake_case.
+     * @array
+     */
+    protected static $headingFixes = [
+        'plant_group_name' => 'plant_group'
+    ];
 
 
     /**
@@ -83,7 +89,7 @@ class PlantItemUtility
      * @return boolean
      */
     protected static function looksLikeBlankRow(array $record){
-        return empty($record['plant_id']) && empty($record['plant_id']) && empty($record['description']);
+        return empty($record['plant_parent_d']) && empty($record['plant_id']) && empty($record['description']);
     }
 
     /**
@@ -95,12 +101,20 @@ class PlantItemUtility
     {
         $valid = [];
         foreach ($record as $key => $value) {
+            //$validKey = self::getKey(Str::snake(strtolower(trim($key))));
             $validKey = Str::snake(strtolower(trim($key)));
             if ($validKey != ''){
                 $valid[$validKey] = $value;
             }
         }
         return $valid;
+    }
+
+    protected static function getKey($key){
+        if (array_key_exists($key, self::$headingFixes)){
+            return self::$headingFixes[$key];
+        }
+        return $key;
     }
 
     /**
