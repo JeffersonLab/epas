@@ -20,18 +20,18 @@ class PlantItemUtilityTest extends TestCase
         $this->assertEquals($items->first()['upstream_isolation'],'FM-58-DP-LAB-1/6');
         $this->assertEquals($items->first()['description'],'Disconnect for 150 Ton Press');
         $this->assertEquals($items->first()['location'], '55_1-1019');
+        $this->assertEquals($items->get(57)['plant_id'],'Scrubber Phenoix Valves');
     }
 
     function test_it_makes_models_from_test_file_1(){
         $models = PlantItemUtility::makeFromSpreadsheet($this->testFile1, 'Accelerator');
-        $this->assertCount(59, $models);
+        $this->assertCount(54, $models);  // four blank lines not made into models, not counted
     }
 
     function test_it_validates_test_file_1_properly(){
         $models = PlantItemUtility::makeFromSpreadsheet($this->testFile1, 'Accelerator');
         // We know certain items from the spreadsheet are good or bad and make the appropriate assertions
         $this->assertTrue($models->get(0)->validate());  // row 2 of spreadsheet, right below header
-        $this->assertFalse($models->get(12)->validate());  // row 14 of spreadsheet, an empty row
-        $this->assertFalse($models->get(17)->validate());  // row 20 of spreadsheet, missing description
+        $this->assertFalse($models->get(16)->validate());  // row 19 of spreadsheet, missing description
     }
 }
