@@ -294,7 +294,6 @@ class UploadPlantItems extends Command
             }catch (\Exception $e){
                 $this->errors->add("row $row ", $e->getMessage());
             }
-            $row++;
             if ($this->progressBar) { $bar->advance();}
         }
         if ($this->progressBar) {
