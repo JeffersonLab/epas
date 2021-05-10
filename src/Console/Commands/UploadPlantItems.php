@@ -280,6 +280,7 @@ class UploadPlantItems extends Command
         }
         foreach ($items as $item) {
             try {
+                $row++;
                 $plantItem = PlantItem::where('plant_id',$item->plant_id)->first();
                 if ($item->isolation_point_plant_id) {
                     $isolationPoint = PlantItem::where('plant_id', strtoupper($item->isolation_point_plant_id))->first();
