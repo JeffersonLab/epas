@@ -79,6 +79,7 @@ class PlantItemUtility
             $processed = static::normalizeKeys($record);
             $processed = static::trimValues($processed);
             $processed = static::normalizeBooleans($processed);
+            $processed = static::normalizeCircuitVoltage($processed);
             return $processed;
         });
     }
@@ -101,8 +102,7 @@ class PlantItemUtility
     {
         $valid = [];
         foreach ($record as $key => $value) {
-            //$validKey = self::getKey(Str::snake(strtolower(trim($key))));
-            $validKey = Str::snake(strtolower(trim($key)));
+            $validKey = self::getKey(Str::snake(strtolower(trim($key))));
             if ($validKey != ''){
                 $valid[$validKey] = $value;
             }
@@ -137,6 +137,23 @@ class PlantItemUtility
             // By convention the boolean attribute names all begin with is_a
             if (substr($key,0, 3) == 'is_'){
                 $record[$key] = static::makeBoolean($value);
+            }
+        }
+        return $record;
+    }
+
+    /**
+     * Convert user-entered values to valid values where possible
+     *  ex: 480 => 480V
+     *
+     * @return array
+     */
+    protected static function normalizeCircuitVoltage($record){
+        if (array_key_exists('circuit_voltage', $record)){
+            $value = $record['circuit_voltage'];
+            // Handle case where user enters voltage as an integer with 'V' on the end.
+            if (is_numeric($value) && substr($value,-1,1) != 'V'){
+                $record['circuit_voltage'] .= 'V';
             }
         }
         return $record;

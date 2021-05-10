@@ -20,6 +20,8 @@ class PlantItemUtilityTest extends TestCase
         $this->assertEquals($items->first()['upstream_isolation'],'FM-58-DP-LAB-1/6');
         $this->assertEquals($items->first()['description'],'Disconnect for 150 Ton Press');
         $this->assertEquals($items->first()['location'], '55_1-1019');
+        $this->assertEquals($items->first()['plant_group'], 'Accelerator');
+        $this->assertEquals($items->first()['circuit_voltage'], '480V');
         $this->assertEquals($items->get(57)['plant_id'],'Scrubber Phenoix Valves');
     }
 
