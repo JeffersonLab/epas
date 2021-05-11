@@ -229,8 +229,10 @@ class UploadPlantItems extends Command
         try{
             return $item->save();
         }catch (\Exception $e){
-            if ($e->getCode() === 1){
+            if ($e->getCode() === 1) {
                 $message = "Plant ID \"{$item->plant_id}\" is a duplicate or already exists";
+            }elseif ($e->getCode() === 2291){
+                    $message = "Plant Parent ID \"{$item->plant_parent_id}\" does not exist";
             }else{
                 $message = $e->getMessage();
             }
