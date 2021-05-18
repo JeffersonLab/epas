@@ -1,5 +1,10 @@
 # Database Schema Details
 
+## ER Diagram
+
+![ER Diagram](https://raw.githubusercontent.com/JeffersonLab/epas/main/ERDiagram.png)
+
+
 ## DDL
 
 ### Plant Items Table
