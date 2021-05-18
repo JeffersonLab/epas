@@ -10,9 +10,13 @@ Via Composer
 $ composer require jlab/epas
 ```
 
+Also see detailed [installation cookbook](https://github.com/JeffersonLab/epas/blob/main/cookbook.md)
+
 ## Usage
 
 ### Create Database
+
+Also see detailed [supplementary database schema info](https://github.com/JeffersonLab/epas/blob/main/database.md)
 
 If the database does not exist, publish and run the migrations
 
@@ -54,23 +58,32 @@ ALTER TABLE plant_items ADD CONSTRAINT chk_is_temporary_item check (is_temporary
 ALTER TABLE plant_items ADD CONSTRAINT chk_method_of_proving check (method_of_proving in ('ZEV', 'ZVV', 'VVU'));
 ALTER TABLE plant_items ADD CONSTRAINT chk_circuit_voltage check (circuit_voltage in ('120V', '208V', '277V','480V','4.16kV','13kV'));
 ```
-
-## API Routes
-The package publishes the following API routes for interacting with plant items
+## Routes
+The package publishes the following routes for interacting with plant items
 ```
-php artisan  route:list --compact --path=api
++----------+---------------------------------------+-------------------------------------------------------------------+
+[theo@localhost plant]$ php artisan route:list --compact 
 +----------+---------------------------------------+-------------------------------------------------------------------+
 | Method   | URI                                   | Action                                                            |
-+----------+---------------------------------------+-------------------------------------------------------------------+
-| GET|HEAD | api/plant-items                       | Jlab\Epas\Http\Controllers\PlantItemApiController@index           |
++----------+---------------------------------------+-------------------------------------------------------------------+                                               |
 | POST     | api/plant-items                       | Jlab\Epas\Http\Controllers\PlantItemApiController@store           |
+| GET|HEAD | api/plant-items                       | Jlab\Epas\Http\Controllers\PlantItemApiController@index           |
 | GET|HEAD | api/plant-items/children              | Jlab\Epas\Http\Controllers\PlantItemApiController@children        |
 | GET|HEAD | api/plant-items/data/isolation-points | Jlab\Epas\Http\Controllers\PlantItemApiController@isolationPoints |
 | POST     | api/plant-items/upload                | Jlab\Epas\Http\Controllers\PlantItemApiController@upload          |
 | GET|HEAD | api/plant-items/{plantItem}           | Jlab\Epas\Http\Controllers\PlantItemApiController@item            |
 | PUT      | api/plant-items/{plantItem}           | Jlab\Epas\Http\Controllers\PlantItemApiController@update          |
-| DELETE   | api/plant-items/{plantItem}           | Jlab\Epas\Http\Controllers\PlantItemApiController@delete          |                                                   |
+| DELETE   | api/plant-items/{plantItem}           | Jlab\Epas\Http\Controllers\PlantItemApiController@delete          |                                               |
+| GET|HEAD | plant-items                           | Jlab\Epas\Http\Controllers\PlantItemController@index              |
+| POST     | plant-items                           | Jlab\Epas\Http\Controllers\PlantItemController@store              |
+| GET|HEAD | plant-items/create                    | Jlab\Epas\Http\Controllers\PlantItemController@create             |
+| GET|HEAD | plant-items/excel                     | Jlab\Epas\Http\Controllers\PlantItemController@excel              |
+| GET|HEAD | plant-items/table                     | Jlab\Epas\Http\Controllers\PlantItemController@table              |
+| GET|HEAD | plant-items/upload                    | Jlab\Epas\Http\Controllers\PlantItemController@uploadForm         |
+| POST     | plant-items/upload                    | Jlab\Epas\Http\Controllers\PlantItemController@upload             |
+| GET|HEAD | plant-items/{plantItem}               | Jlab\Epas\Http\Controllers\PlantItemController@item               |
 +----------+---------------------------------------+-------------------------------------------------------------------+
+
 
 ```
 
