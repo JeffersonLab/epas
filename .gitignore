@@ -1,5 +1,4 @@
 /vendor/
 .idea/
 node_modules/
-mix-manifest.json
 .phpunit.result.cache
