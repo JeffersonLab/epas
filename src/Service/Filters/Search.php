@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Search implements Filter
 {
+    // Value to send to elasticsearch paginator
+    // default will be 10 results otherwise!
+    public static $perPage = 1000;
+
     /**
      * @inheritDoc
      */
@@ -18,7 +22,9 @@ class Search implements Filter
                 $ids = [$value];
             } else {
                 if (method_exists($builder->getModel(),'search')){
-                    $ids = $builder->getModel()->search($value)->get()->pluck('id');
+                    $ids = $builder->getModel()->search($value)
+                        ->paginate(self::$perPage)->getCollection()
+                        ->pluck('id');
                 }
             }
             $builder->whereIn('id', $ids);
