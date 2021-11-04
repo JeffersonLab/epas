@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
+use Jlab\Epas\Console\Commands\UploadIsolationPoints;
 use Jlab\Epas\Console\Commands\UploadPlantItems;
 use Jlab\Epas\Http\Middleware\SetPlantItemRootView;
 use Jlab\Epas\Model\PlantItem;
@@ -31,7 +32,8 @@ class EpasServiceProvider extends ServiceProvider
         // Declare package commands here so they can be called via web and not
         // just via console as would be the case if placed in bootForConsole().
         $this->commands([
-            UploadPlantItems::class
+            UploadPlantItems::class,
+            UploadIsolationPoints::class,
         ]);
 
         $this->declarePolicies();
