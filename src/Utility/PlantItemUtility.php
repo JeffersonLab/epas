@@ -69,13 +69,13 @@ class PlantItemUtility
      * @throws \Box\Spout\Common\Exception\UnsupportedTypeException
      * @throws \Box\Spout\Reader\Exception\ReaderNotOpenedException
      */
-    public static function readFromSpreadsheet($file)
+    public static function readFromSpreadsheet($file, $sheet = 1)
     {
         // We call the FastExcel import to read our file.
         // As the second argument we give it a callback function that will
         // perform some initial processing on the data that was read such as
         // trying to normalize the keys of each array record being returned
-        return (new FastExcel)->sheet(1)->import($file, function ($record) {
+        return (new FastExcel)->sheet($sheet)->import($file, function ($record) {
             $processed = static::normalizeKeys($record);
             $processed = static::trimValues($processed);
             $processed = static::normalizeBooleans($processed);
