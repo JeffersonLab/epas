@@ -22,6 +22,7 @@ class UploadPlantItems extends Command
                             {--progress-bar : show progress bar on CLI}
                             {--replace : delete any existing rows spreadsheet of same name}
                             {--update : update existing plantids}
+                            {--disable-search-syncing : disable search syncing during import}
                             {file : path to valid excel .xlsx file}';
 
     /**
@@ -60,6 +61,13 @@ class UploadPlantItems extends Command
      */
     public function handle()
     {
+        // We allow the user to disable search syncing which could be useful
+        // for large datasets or in dev environments where search indexing is
+        // not enabled.
+        if ($this->option('disable-search-syncing')) {
+            PlantItem::disableSearchSyncing();
+        }
+
         try{
             $this->progressBar = (php_sapi_name() == 'cli');  // not via web!
             $this->dataSource = basename($this->argument('file'));
@@ -67,9 +75,7 @@ class UploadPlantItems extends Command
                 $this->argument('file'),
                 $this->option('plant-group')
             );
-            //$this->line('Validate:');
             $this->validate($items);
-            //$this->line('Insert and Audit:');
             $this->saveAndAudit($items);
             $this->attachIsolationPoints($items);
             return 0;
@@ -85,6 +91,7 @@ class UploadPlantItems extends Command
      * Perform model self-validation on the models prior to
      * their insertion in the database.
      * @param $items
+     * @throws \Exception
      */
     protected function validate(Collection $items){
         $row = 1;
@@ -138,11 +145,11 @@ class UploadPlantItems extends Command
     }
 
 
-
     /**
      * Inserts models.
      * Generates error messages if a model already exists.
-     * @param $items
+     * @param Collection $items
+     * @throws \Exception
      */
     protected function insert(Collection $items){
         $row = 1;
@@ -174,7 +181,8 @@ class UploadPlantItems extends Command
     /**
      * Updates or Inserts models.
      *
-     * @param $items
+     * @param Collection $items
+     * @throws \Exception
      */
     protected function update(Collection $items){
         $row = 1;
@@ -210,7 +218,8 @@ class UploadPlantItems extends Command
      *
      * Returns original if no matching DB item was found.
      *
-     * @param $item
+     * @param PlantItem $item
+     * @return mixed
      */
     protected function mergeWithExisting(PlantItem $item){
         $targetItem = PlantItem::firstOrNew(['plant_id' => $item->plant_id]);
@@ -272,7 +281,8 @@ class UploadPlantItems extends Command
      * Attaches related plant item that serves as an isolation point
      * if available.
      *
-     * @param $items
+     * @param Collection $items
+     * @throws \Exception
      */
     protected function attachIsolationPoints(Collection $items){
         $row = 1;
