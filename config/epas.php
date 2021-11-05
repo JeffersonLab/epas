@@ -36,7 +36,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | ePAS Administrators
+    | External Data Sources
     |--------------------------------------------------------------------------
     |
     | Here you specify the list of data source names that indicate the data has
