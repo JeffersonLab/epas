@@ -144,6 +144,15 @@ $ composer update
 $ vendor/bin/phpunit 
 ```
 
+## Search Index
+Data inserted into Oracle from Maximo and HCO via database links does automatically get added to the search index.  To make it searchable it is
+necessary to flush the index and then rebuild it.  This can be done with the following to commands issued from the top-level project directory:
+
+``` bash
+./artisan scout:flush "\Jlab\Epas\Model\PlantItem"
+./artisan scout:import "\Jlab\Epas\Model\PlantItem"
+```
+
 ## Contributing
 
 Please see [contributing.md](contributing.md) for details and a todolist.
