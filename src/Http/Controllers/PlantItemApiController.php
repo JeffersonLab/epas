@@ -16,7 +16,7 @@ class PlantItemApiController extends ApiController
 {
 
     /**
-     * Retrieve a list of terms.
+     * Retrieve a list of plant items that are children of a specified plant_parent_id.
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -37,6 +37,13 @@ class PlantItemApiController extends ApiController
         return $this->resourceResponse(new PlantItemDetailResource($plantItem));
     }
 
+    /**
+     * Retrieve a list of plant items that are isolation points and that match
+     * the request query parameters.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function isolationPoints(Request $request)
     {
         // Build a search object using the request
@@ -45,7 +52,9 @@ class PlantItemApiController extends ApiController
         // Because it's the purpose of this method, we force
         // the isIsolationPoint filter to be used.
         $request->query->set('isIsolationPoint', true);
-        // The primary query parameter we expect is IsolationPointLike
+
+        // The primary query parameter we implicitly expect is
+        // being passed to applyRequest is "IsolationPointLike"
         $search->applyRequest($request);
 
         // Build a collection of Plant Items
@@ -54,6 +63,12 @@ class PlantItemApiController extends ApiController
         return $this->resourceResponse(PlantItemResource::collection($models));
     }
 
+    /**
+     * Return a list of Plant items that match the provided query request.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request)
     {
         // Build a search object using the request
@@ -66,6 +81,13 @@ class PlantItemApiController extends ApiController
         return $this->resourceResponse(PlantItemResource::collection($models));
     }
 
+    /**
+     * Store a new Plant Item in the database.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function store(Request $request)
     {
         $this->authorize('create', PlantItem::class);
@@ -96,7 +118,8 @@ class PlantItemApiController extends ApiController
     }
 
     /**
-     * Sets plant item properties with values
+     * Sets fillable plant item properties with values from an array.
+     *
      * @param PlantItem $plantItem
      * @param array $values
      * @return PlantItem
@@ -110,7 +133,8 @@ class PlantItemApiController extends ApiController
     }
 
     /**
-     * Save the model or else throw an exception.
+     * Save the plant item if it passes validation checks, otherwise throw a ModelException.
+     *
      * @param PlantItem $plantItem
      * @return PlantItem|null
      * @throws ModelException
@@ -127,6 +151,13 @@ class PlantItemApiController extends ApiController
         return $plantItem->fresh();
     }
 
+    /**
+     * Assign isolation points to a plant item.
+     *
+     * @param PlantItem $plantItem
+     * @param array $isolationPoints
+     * @return void
+     */
     protected function setIsolationPoints(PlantItem $plantItem, $isolationPoints)
     {
         $collection = collect($isolationPoints);
@@ -169,7 +200,7 @@ class PlantItemApiController extends ApiController
     }
 
     /**
-     * Update a PlantItem.
+     * Update the fillable attributes of a PlantItem.
      *
      * @param PlantItem $plantItem
      * @return \Illuminate\Http\JsonResponse
@@ -207,6 +238,14 @@ class PlantItemApiController extends ApiController
         }
     }
 
+    /**
+     * Delete a plant item from the database.
+     *
+     * @param PlantItem $plantItem
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse|mixed
+     * @throws \Illuminate\Auth\Access\AuthorizationException
+     */
     public function delete(PlantItem $plantItem, Request $request)
     {
         $this->authorize('delete', $plantItem);
