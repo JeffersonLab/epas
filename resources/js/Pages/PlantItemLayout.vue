@@ -26,9 +26,13 @@
                         <b-dropdown-item  :href="route('plant_items.create')">
                             New Plant Item
                         </b-dropdown-item>
-                        <b-dropdown-item :href="route('plant_items.upload_form')">
-                            Spreadsheet Upload
+                        <b-dropdown-item :href="route('plant_items.upload_plant_items_form')">
+                            Upload Plant Items
                         </b-dropdown-item>
+                        <b-dropdown-item :href="route('plant_items.upload_isolation_points_form')">
+                          Upload Isolation Points
+                        </b-dropdown-item>
+
                     </b-nav-item-dropdown>
                 </b-navbar-nav>
 

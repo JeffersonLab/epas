@@ -24,7 +24,13 @@ class PlantItemController extends Controller
     public function __construct(Request $request)
     {
         parent::__construct($request);
-        $this->middleware('auth')->only(['create', 'upload', 'uploadForm']);
+        $this->middleware('auth')->only([
+            'create', 
+            'uploadPlantItems', 
+            'uploadPlantItemsForm',
+            'uploadIsolationPoints',
+            'uploadIsolationPointsForm',
+            ]);
         $this->middleware(SetPlantItemRootView::class);
     }
 
@@ -55,7 +61,7 @@ class PlantItemController extends Controller
     /**
      * Accept a spreadsheet upload
      */
-    public function upload(Request $request)
+    public function uploadPlantItems(Request $request)
     {
         try {
             // Retrieves a Laravel File Upload object
@@ -92,7 +98,7 @@ class PlantItemController extends Controller
                 // We're simply returning the error messages to the user.
                 //return $this->error(Artisan::output(), 422);
                 $errors = new MessageBag(['file' => Artisan::output()]);
-                return redirect(route('plant_items.upload_form'))
+                return redirect(route('plant_items.upload_plant_items_form'))
                     ->withErrors($errors)
                     ->withInput();
             }
@@ -104,11 +110,73 @@ class PlantItemController extends Controller
                 'The spreadsheet was successfully uploaded.');
         } catch (\Exception $e) {
             $errors = new MessageBag(['form' => $e->getMessage()]);
-            return redirect(route('plant_items.upload_form'))
+            return redirect(route('plant_items.upload_plant_items_form'))
                 ->withErrors($errors)
                 ->withInput();
         }
     }
+
+
+    /**
+     * Accept a spreadsheet upload
+     */
+    public function uploadIsolationPoints(Request $request)
+    {
+//        dd($request->all());
+
+        try {
+            // Retrieves a Laravel File Upload object
+            $uploadedFile = $request->file('file');
+            $fileName = $this->uniqueFileName($uploadedFile->getClientOriginalName());
+
+            // If a file of the same name was already uploaded and
+            // the user didn't explicitly ask for replacement, it's an
+            // error that will abort processing.
+            if ($request->get('replaceOption', false) != 'replace') {
+                $this->assertFileNotAlreadyExist($fileName);
+            }
+
+            // Copy the file to the epas temp directory
+            $path = $request->file('file')->storeAs(
+                'epas/tmp', $fileName
+            );
+
+            // Prepare the arguments to be passed to Artisan command
+            $arguments = [
+                'file' => Storage::path($path),
+                '--sheet' => $request->get('sheet', 2)
+            ];
+
+            if ($request->get('replaceOption', false) == 'replace') {
+                $arguments['--replace'] = true;
+            }
+
+            // Here we re-use the same artisan command as via the command line
+            $exitCode = Artisan::call('plant-items:upload-isolation-points', $arguments);
+            if ($exitCode != 0) {
+                // For debugging purposes, we're not deleting the
+                // temp file right now when it contained errors.
+                // We're simply returning the error messages to the user.
+                //return $this->error(Artisan::output(), 422);
+                $errors = new MessageBag(['file' => Artisan::output()]);
+                return redirect(route('plant_items.upload_isolation_points_form'))
+                    ->withErrors($errors)
+                    ->withInput();
+            }
+
+            Storage::move('epas/tmp/' . $fileName, 'epas/' . $fileName);
+
+            // Give the user a thumbs-up
+            return redirect(route('plant_items.upload_isolation_points_form', ['data_source' => $fileName]))->with('success', 'The spreadsheet was successfully uploaded.');
+        } catch (\Exception $e) {
+            $errors = new MessageBag(['form' => $e->getMessage()]);
+            return redirect(route('plant_items.upload_isolation_points_form'))
+                ->withErrors($errors)
+                ->withInput();
+        }
+    }
+
+
 
     protected function assertFileNotAlreadyExist($file)
     {
@@ -156,10 +224,18 @@ class PlantItemController extends Controller
 
     }
 
-    protected function uploadForm()
+    protected function uploadPlantItemsForm()
     {
-        return Inertia::render('Pages/PlantItemUploadForm', [
-            'formFieldData' => $this->spreadsheetFormFieldData()
+        return Inertia::render('Pages/PlantItemsUploadForm', [
+            'formFieldData' => $this->plantItemsFormFieldData()
+        ]);
+
+    }
+
+    protected function uploadIsolationPointsForm()
+    {
+        return Inertia::render('Pages/IsolationPointsUploadForm', [
+            'formFieldData' => $this->isolationPointsFormFieldData()
         ]);
 
     }
@@ -253,10 +329,20 @@ class PlantItemController extends Controller
      * Form element data for plant item spreadsheet upload form
      * @return array[]
      */
-    protected function spreadsheetFormFieldData(){
+    protected function isolationPointsFormFieldData(){
+        return [
+            'replaceOptions' => $this->isolationPointReplaceOptions(),
+        ];
+    }
+
+    /**
+     * Form element data for plant item spreadsheet upload form
+     * @return array[]
+     */
+    protected function plantItemsFormFieldData(){
         return [
             'plantGroupOptions' => $this->spreadsheetPlantGroupOptions(),
-            'replaceOptions' => $this->replaceOptions(),
+            'replaceOptions' => $this->plantItemReplaceOptions(),
         ];
     }
 
@@ -317,11 +403,24 @@ class PlantItemController extends Controller
      * Spreadsheet data source overwriting options.
      * @return \string[][]
      */
-    protected function replaceOptions()
+    protected function plantItemReplaceOptions()
     {
         return [
             ['value' => 'keep', 'text' => 'Do Not Update'],
             ['value' => 'update', 'text' => 'Update Plant Items']
         ];
     }
+
+    /**
+     * Spreadsheet data source overwriting options.
+     * @return \string[][]
+     */
+    protected function isolationPointReplaceOptions()
+    {
+        return [
+            ['value' => 'keep', 'text' => 'Preserve Existing'],
+            ['value' => 'replace', 'text' => 'Replace Existing']
+        ];
+    }
+
 }

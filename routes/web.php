@@ -28,15 +28,25 @@ Route::group([
               'uses' => 'PlantItemController@create'
           ]);
 
-          Route::get('plant-items/upload', [
-              'as' => 'plant_items.upload_form',
-              'uses' => 'PlantItemController@uploadForm'
+          Route::get('plant-items/upload-plant-items', [
+              'as' => 'plant_items.upload_plant_items_form',
+              'uses' => 'PlantItemController@uploadPlantItemsForm'
           ]);
 
-          Route::post('plant-items/upload', [
-              'as' => 'plant_items.upload',
-              'uses' => 'PlantItemController@upload'
+          Route::post('plant-items/upload-plant-items', [
+              'as' => 'plant_items.upload_plant_items',
+              'uses' => 'PlantItemController@uploadPlantItems'
           ]);
+
+        Route::get('plant-items/upload-isolation-points', [
+            'as' => 'plant_items.upload_isolation_points_form',
+            'uses' => 'PlantItemController@uploadIsolationPointsForm'
+        ]);
+
+        Route::post('plant-items/upload-isolation-points', [
+            'as' => 'plant_items.upload_isolation_points',
+            'uses' => 'PlantItemController@uploadIsolationPoints'
+        ]);
 
           Route::get('plant-items/table', [
               'as' => 'plant_items.table',

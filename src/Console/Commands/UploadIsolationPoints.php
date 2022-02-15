@@ -17,6 +17,7 @@ class UploadIsolationPoints extends Command
      */
     protected $signature = 'plant-items:upload-isolation-points
                             {--progress-bar : show progress bar on CLI}
+                            {--replace : replace existing isolation points}
                             {--sheet=2: the number of the spreadsheet tab containing the isolation points data} 
                             {file : path to valid excel .xlsx file}';
 
@@ -102,6 +103,7 @@ class UploadIsolationPoints extends Command
             if (! $isolationPlantItem){
                 throw new \Exception('isolation_point_plant_id '.$row['isolation_point_plant_id'].' not found');
             }
+            // TODO transaction to remove and replace based on a --replace flag
             if (! $plantItem->isolationPoints->contains($isolationPlantItem)){
                 $plantItem->isolationPoints()->attach($isolationPlantItem);
             }

@@ -1,7 +1,7 @@
 <template>
     <b-container fluid class="plant-items">
         <b-form class="plant-items-form" @submit.prevent="onSubmit" @reset="onReset">
-            <h1>Plant Item Spreadsheet Upload Form</h1>
+            <h1>Isolation Point Spreadsheet Upload Form</h1>
             <hr />
         <div class="row">
             <div class="col">
@@ -32,17 +32,15 @@
             </div>
             <div class="col">
                 <h2>Spreadsheet Help</h2>
-                <p>To maximize the likelihood that your spreadsheet will upload successfully:</p>
+                <p>Formatting:</p>
                 <ul>
-                    <li>Fill your data into the <a href="/epas/plant_item_template.xlsx">template spreadsheet</a></li>
-                    <li>Make sure the file is an Excel spreadsheet in .xlsx format.</li>
+                    <li>See the <a href="/epas/isolation_point_template.xlsx">template spreadsheet</a> for example of correct layout</li>
+                    <li>Make sure column names in header row are <i>plant id</i> and <i>isolation point plant id</i>. Other columns will be ignored.</li>
                     <li>Leave no blank rows before header row.</li>
-                    <li>Use only valid column names in header row.</li>
                     <li>Leave no blank/incomplete rows in the middle of data.</li>
-                    <li>Reference only valid plant_id values in your plant_parent_id and isolation_point_plant_id columns.
+                    <li>May only reference existing plant_id values in your plant_parent_id and isolation_point_plant_id columns.
                     </li>
-                    <li>List parent plant items you are creating ahead of any child plant items that reference them.
-                    </li>
+                    <li>Make sure the file is an Excel spreadsheet in .xlsx format.</li>
                 </ul>
 
             </div>
@@ -52,13 +50,15 @@
             <div class="col">
                 <fieldset>
                     <!-- Elements to upload Excel Spreadsheet -->
-                    <legend>Plant Group</legend>
-                    <b-form-select v-model="form.plantGroup" :options="formFieldData.plantGroupOptions"></b-form-select>
+                    <legend>Sheet Number</legend>
+                   <b-form-spinbutton id="tab-sb" v-model="form.sheet" min="1" max="5"></b-form-spinbutton>
                 </fieldset>
             </div>
             <div class="col">
-                <h2>Plant Group Help</h2>
-                <p>For ePAS, each plant item must specify that it belongs to a "Plant Group".  In lieu of specifying a value for reach row in the spreadsheet, a value can be specified here.  If a value is specified here, it will override any plant group values in the spreadsheet.</p>
+                <h2>Sheet Number Help</h2>
+                <p>Specify the number of the worksheet in the .xlsx file that contains isolation point data
+                to be assigned.  The value defaults to 2 because a typical use pattern is to place plant items in
+                sheet 1 and (extra) isolation point assignments in sheet 2.</p>
             </div>
         </div>
 
@@ -72,10 +72,10 @@
             </div>
             <div class="col">
                 <h2>Options Help</h2>
-                <dt>Do Not Update</dt>
-                <dd>If the spreadsheet contains any plant_id values that already exist, the file will be rejected.</dd>
-                <dt>Update Plant Items</dt>
-                <dd>If a plant_id value found in the spreadsheet already exists in the database, the database row will be updated with data attributes from the matching spreadsheet plant item row.</dd>
+                <dt>Preserve Existing</dt>
+                <dd>Add new isolation points from the spreadsheet while keeping any existing assignments.</dd>
+                <dt>Replace Existing</dt>
+                <dd>First remove existing isolation point records and then update listed plant items with new data from the spreadsheet.</dd>
             </div>
         </div>
             <hr />
@@ -91,7 +91,7 @@
 <script>
 import PlantItemLayout from './PlantItemLayout'
 export default {
-    name: "PlantItemUploadForm",
+    name: "IsolationPointsUploadForm",
     props: {
         formFieldData: Object,
     },
@@ -103,7 +103,7 @@ export default {
         return {
             form: this.$inertia.form({
                 file: null,
-                plantGroup: '',
+                sheet: 2,
                 replaceOption: 'keep',
             }),
             feedback: null,
@@ -114,7 +114,7 @@ export default {
             event.preventDefault()
             this.clearFeedback()
             if (this.form.file) {
-                this.form.post('/plant-items/upload')
+                this.form.post('/plant-items/upload-isolation-points')
                 }else{
                     alert('No file selected for upload.')
                 }
@@ -142,7 +142,7 @@ export default {
         clearForm(){
             // Reset our form values
             this.form.file = null
-            this.form.plantGroup = ''
+            this.form.sheet = 2
             this.form.replaceOption = 'keep'
             // Trick to reset/clear native browser form validation state
             this.show = false
