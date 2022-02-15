@@ -31,10 +31,10 @@ Route::group([
             'uses' => 'PlantItemApiController@isolationPoints'
         ]);
 
-        Route::post('plant-items/upload', [
-            'as' => 'api.plant_items.upload',
-            'uses' => 'PlantItemApiController@upload'
-        ]);
+//        Route::post('plant-items/upload-plant', [
+//            'as' => 'api.plant_items.upload_plant',
+//            'uses' => 'PlantItemApiController@uploadPlant'
+//        ]);
 
         Route::get('plant-items/{plantItem}', [
             'as' => 'api.plant_items.item',
