@@ -67,6 +67,11 @@ class UploadIsolationPoints extends Command
      */
     public function handle()
     {
+        // Re-initialize the processed list in case the current command instance
+        // gets reused, for example during testing where we load multiple sheets
+        // in a row.
+        $this->processed = [];
+
         try{
             $this->progressBar = (php_sapi_name() == 'cli');  // not via web!
             $rows = PlantItemUtility::readFromSpreadsheet(
