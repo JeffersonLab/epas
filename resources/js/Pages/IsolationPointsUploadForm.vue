@@ -21,8 +21,7 @@
                         placeholder="Choose a file or drop it here..."
                         drop-placeholder="Drop file here..."
                     ></b-form-file>
-                    <p class="description">Be sure to give your spreadsheet a meaningful name -- it will become the data
-                        source field for the items imported from it.</p>
+                    <p class="description">Excel file containing a sheet/tab with plant_id to isolation_point_plant_id mapping.</p>
                     <div id="upload-feedback" v-if="errors && errors.file">
                         <b-card>
                             <b-card-text><pre class="errors">{{errors.file}}</pre></b-card-text>
