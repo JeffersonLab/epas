@@ -95,7 +95,7 @@ npm run dev  # or production, watch, etc.
 ```
 
 ## Configuration
-The package provides an *epas.php* config file which may be published and then edited.  Comments in the file describe the purpose of each option.
+The package provides an *epas.php* config file which must be published every time a new version is downloaded via composer. 
 
 ```bash
 $ php artisan vendor:publish --provider="Jlab\Epas\EpasServiceProvider" --tag="config"
@@ -105,10 +105,7 @@ $ php artisan vendor:publish --provider="Jlab\Epas\EpasServiceProvider" --tag="c
 The package provide an artisan console command to assist with importing plant items from a spreadsheet:
 
 ```text
-$ php artisan help plant-items:upload
-
-Description:
-  Upload a spreadsheet containing Plant Items
+$   Upload a spreadsheet containing Plant Items
 
 Usage:
   plant-items:upload [options] [--] <file>
@@ -120,16 +117,36 @@ Options:
       --plant-group[=PLANT-GROUP]  plant group name to use
       --progress-bar               show progress bar on CLI
       --replace                    delete any existing rows spreadsheet of same name
-  -h, --help                       Display help for the given command. When no command is given display help for the list command
+      --update                     update existing plantids
+      --disable-search-syncing     disable search syncing during import
+  -h, --help                       Display help for the given command. 
   -q, --quiet                      Do not output any message
   -V, --version                    Display this application version
-      --ansi                       Force ANSI output
-      --no-ansi                    Disable ANSI output
+      --ansi|--no-ansi             Force (or disable --no-ansi) ANSI output
   -n, --no-interaction             Do not ask any interactive question
       --env[=ENV]                  The environment the command should run under
-  -v|vv|vvv, --verbose             Increase the verbosity of messages: 1 for nor
-```
+  -v|vv|vvv, --verbose             Increase the verbosity of messages
 
+```
+```bash
+$ php artisan help plant-items:upload-isolation-points
+Description:
+  Upload isolation points data from a spreadsheet.
+
+Usage:
+  plant-items:upload-isolation-points [options] [--] <file>
+
+Arguments:
+  file                  path to valid excel .xlsx file
+
+Options:
+      --progress-bar    show progress bar on CLI
+      --replace         replace existing isolation points
+      --sheet[=SHEET]    [default: "2: the number of the spreadsheet tab containing the isolation points data"]
+  -h, --help            Display help for the given command. When no command is given display help for the list command
+  -q, --quiet           Do not output any message
+
+```
 
 
 ## Change log
@@ -153,14 +170,9 @@ necessary to flush the index and then rebuild it.  This can be done with the fol
 ./artisan scout:import "\Jlab\Epas\Model\PlantItem"
 ```
 
-## Contributing
-
-Please see [contributing.md](contributing.md) for details and a todolist.
-
 ## Security
 
 If you discover any security related issues, please email theo@jlab.org instead of using the issue tracker.
-
 
 ## License
 
