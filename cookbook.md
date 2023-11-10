@@ -8,7 +8,7 @@ Instructions for various OS and Docker available at: https://laravel.com/docs/8.
 
 Example on linux using composer (https://getcomposer.org/). 
 ```shell
-composer create-project laravel/laravel plant-items
+composer create-project laravel/laravel="^8.0" plant-items
 cd plant-items
 chmod 777 storage/logs
 chmod -R 777 storage/framework
