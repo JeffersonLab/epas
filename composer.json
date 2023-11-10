@@ -15,13 +15,14 @@
         "laravel/scout": "^8.0",
         "babenkoivan/elastic-scout-driver": "^1.0",
         "babenkoivan/elastic-scout-driver-plus": "^1.0",
-        "rap2hpoutre/fast-excel": "^2.5",
         "jlab/laravel-utilities": "^8.1",
         "laravel/legacy-factories": "^1.1",
         "inertiajs/inertia-laravel": "^0.4.1",
         "tightenco/ziggy": "^1.1",
-        "maatwebsite/excel": "^3.1",
-        "ext-pdo": "*"
+        "maatwebsite/excel": "^3.1.50",
+        "ext-pdo": "*",
+        "laravel/sail": "^1.19",
+        "rap2hpoutre/fast-excel": "^5.3"
     },
     "require-dev": {
         "phpunit/phpunit": "~9.0",

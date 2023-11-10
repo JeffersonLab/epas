@@ -1,0 +1,98 @@
+# For more information: https://laravel.com/docs/sail
+version: '3'
+services:
+    laravel.test:
+        build:
+            context: ./docker/8.1
+            dockerfile: Dockerfile
+            args:
+                WWWGROUP: '${WWWGROUP}'
+        image: sail-8.1/app
+        extra_hosts:
+            - 'host.docker.internal:host-gateway'
+        ports:
+            - '${APP_PORT:-80}:80'
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        environment:
+            WWWUSER: '${WWWUSER}'
+            LARAVEL_SAIL: 1
+            XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+            XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
+        volumes:
+            - '.:/var/www/html'
+        networks:
+            - sail
+        depends_on:
+            - redis
+            - meilisearch
+            - mailhog
+            - selenium
+            - oracle
+    oracle:
+        image: 'gvenzl/oracle-xe:18'
+        hostname: oracle
+        ports:
+            - '${FORWARD_ORA_PORT:-1521}:1521'
+        environment:
+            ORACLE_PASSWORD: '${ORACLE_PASSWORD}'
+            APP_USER: '${APP_USER}'
+            APP_USER_PASSWORD: '${APP_USER_PASSWORD}'
+            DB_PASSWORD: '${DB_PASSWORD}'
+        volumes:
+            # Keeps persistent oracle data in project run directory
+            - './run/var/oracle/oradata:/opt/oracle/oradata'
+            #  *.sql, *.sql.gz, *.sql.zip or *.sh scripts to perform additional initialization of the database
+            #  that are only run the first time the database is initialized.
+            - './run/var/oracle/initdb:/container-entrypoint-initdb.d'
+            # *.sql, *.sql.gz, *.sql.zip or *.sh scripts to perform additional action after the database
+            # running has been started
+            - './run/var/oracle/startdb:/container-entrypoint-startdb.d'
+        networks:
+            - sail
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6379}:6379'
+        volumes:
+            - 'sail-redis:/data'
+        networks:
+            - sail
+        healthcheck:
+            test: ["CMD", "redis-cli", "ping"]
+            retries: 3
+            timeout: 5s
+    meilisearch:
+        image: 'getmeili/meilisearch:latest'
+        ports:
+            - '${FORWARD_MEILISEARCH_PORT:-7700}:7700'
+        volumes:
+            - 'sail-meilisearch:/meili_data'
+        networks:
+            - sail
+        healthcheck:
+            test: ["CMD", "wget", "--no-verbose", "--spider",  "http://localhost:7700/health"]
+            retries: 3
+            timeout: 5s
+    mailhog:
+        image: 'mailhog/mailhog:latest'
+        ports:
+            - '${FORWARD_MAILHOG_PORT:-1025}:1025'
+            - '${FORWARD_MAILHOG_DASHBOARD_PORT:-8025}:8025'
+        networks:
+            - sail
+    selenium:
+        image: 'selenium/standalone-chrome'
+        volumes:
+            - '/dev/shm:/dev/shm'
+        networks:
+            - sail
+networks:
+    sail:
+        driver: bridge
+volumes:
+    sail-mysql:
+        driver: local
+    sail-redis:
+        driver: local
+    sail-meilisearch:
+        driver: local
