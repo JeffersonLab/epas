@@ -8,7 +8,7 @@ Instructions for various OS and Docker available at: https://laravel.com/docs/8.
 
 Example on linux using composer (https://getcomposer.org/). 
 ```shell
-composer create-project laravel/laravel plant-items
+composer create-project laravel/laravel="^8.0" plant-items
 cd plant-items
 chmod 777 storage/logs
 chmod -R 777 storage/framework
@@ -68,6 +68,30 @@ DB_DATABASE=xepdb1
 DB_SERVICE_NAME=xepdb1
 DB_USERNAME=########
 DB_PASSWORD=########
+```
+
+## URL considerations
+
+If the application making use of the package is hosted on a web server such that urls include a prefix, then some configuration changes are necessary.  For example, if the root url is /apps/epas rather than /, the following items are 
+necessary:
+
+.env file
+```
+APP_URL=https://host.full.url/apps/epas
+MIX_ASSET_URL=/apps/epas
+```
+
+config/app.php
+```
+'mix_url' => env('MIX_ASSET_URL', null)
+```
+
+public/.htaccess
+```
+# Send Requests To Front Controller...
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ /apps/epas/index.php [L]
 ```
 
 ## Configure and run Laravel Mix
