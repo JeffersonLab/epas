@@ -14,10 +14,11 @@ class CreatePlantItemsTable extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('plant_items')) {
             Schema::create('plant_items', function (Blueprint $table) {
                 $table->id();
                 $table->timestamps();
-                $table->timestamp('integrated_at',6)->nullable();
+                $table->timestamp('integrated_at', 6)->nullable();
                 $table->string('plant_parent_id', 255)->index()->nullable();
                 $table->string('plant_id', 255)->unique();
                 $table->string('functional_location', 255)->nullable();
@@ -49,7 +50,7 @@ class CreatePlantItemsTable extends Migration
                 $table->string('data_source', 255);
                 $table->string('data_source_id', 255)->nullable();
             });
-
+        }
     }
 
 

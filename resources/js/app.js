@@ -1,7 +1,6 @@
 window._ = require('lodash');
 window.axios = require('axios');
 import Vue from 'vue'
-import {InertiaApp} from "@inertiajs/inertia-vue";
 import {BootstrapVue, BootstrapVueIcons} from 'bootstrap-vue';
 import VueAxios from 'vue-axios';
 import VueMeta from 'vue-meta'
@@ -12,8 +11,7 @@ Vue.use(VueMeta);
 Vue.use(require('vue-moment'));
 
 // Vue.use(InertiaApp);
-import { plugin } from '@inertiajs/inertia-vue'
-Vue.use(plugin)
+import { createInertiaApp } from '@inertiajs/inertia-vue'
 
 import { InertiaProgress } from '@inertiajs/progress'
 InertiaProgress.init({
@@ -43,24 +41,17 @@ Vue.component('plant-item-tree', require('./components/plant-item/PlantItemTree'
 Vue.mixin({ methods: { route }});
 
 const app = document.getElementById('app')
-let vueApp = new Vue({
-    //store,
-    render: h => h(InertiaApp, {
-        props: {
-            initialPage: JSON.parse(app.dataset.page),
-            resolveComponent: name => require(`./${name}`).default,
-            transformProps: props => {
-                // We're using this hook as a point at which we can
-                // set currentUser available globally rather than
-                // having to do it in every top level component.
-                if (props.currentUser){
-                    //store.commit('auth/setCurrentUser', props.currentUser);
-                }else{
-                    //store.commit('auth/setCurrentUser', {});
-                }
-                return {...props}
-            },
-        },
-    }),
-}).$mount(app)
-vueApp.$http.defaults.withCredentials=true
+
+createInertiaApp({
+    resolve: name => require(`./Pages/${name}`),
+    setup({ el, App, props, plugin }) {
+        Vue.use(plugin)
+
+        new Vue({
+            render: h => h(App, props),
+        }).$mount(el)
+    },
+})
+
+// Is below necessary?
+// vueApp.$http.defaults.withCredentials=true

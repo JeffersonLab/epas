@@ -2,10 +2,9 @@
 
 namespace Jlab\Epas\Model;
 
-use ElasticScoutDriverPlus\CustomSearch;
 use Illuminate\Support\Facades\DB;
 use Jlab\LaravelUtilities\BaseModel;
-use Laravel\Scout\Searchable;
+use Elastic\ScoutDriverPlus\Searchable;
 
 /**
  * Class PlantItem
@@ -14,7 +13,6 @@ class PlantItem extends BaseModel
 {
 
     use Searchable;
-    use CustomSearch;
 
     /**
      * The attributes that should be cast.

@@ -3,8 +3,7 @@
 
 namespace Jlab\Epas\Tests\Http;
 
-use Inertia\Testing\Assert;
-use Jlab\Epas\Tests\TestCase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 class PlantItemPageTest extends HttpTestCase
 {
