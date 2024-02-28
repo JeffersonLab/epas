@@ -10,6 +10,7 @@ class PlantItemCreateTest extends HttpTestCase
     /** @test */
     function it_returns_page_data()
     {
+        $this->withoutMix();  //@see https://github.com/orchestral/testbench/issues/241
         $response = $this->actingAs($this->adminUser)
             ->get(route('plant_items.create'));
         $response->assertStatus(200);
