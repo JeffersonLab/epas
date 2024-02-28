@@ -26,7 +26,7 @@ class PlantItem extends BaseModel
         'is_isolation_point' => 'boolean',
         'is_plant_item' => 'boolean',
         'is_confined_space' => 'boolean',
-        'is_safety_item' => 'boolean',
+        'is_safety_system' => 'boolean',
     ];
 
     /**
