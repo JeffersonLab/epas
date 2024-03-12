@@ -2,6 +2,7 @@
 
 namespace Jlab\Epas\Model;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Jlab\LaravelUtilities\BaseModel;
 use Elastic\ScoutDriverPlus\Searchable;
@@ -13,6 +14,7 @@ class PlantItem extends BaseModel
 {
 
     use Searchable;
+    use SoftDeletes;
 
     /**
      * The attributes that should be cast.
@@ -36,6 +38,7 @@ class PlantItem extends BaseModel
      */
     protected $dates = [
         'integrated_at',
+        'deleted_at',
     ];
 
     /**
