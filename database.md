@@ -3,7 +3,7 @@
 ## ER Diagram
 
 ![ER Diagram](https://raw.githubusercontent.com/JeffersonLab/epas/main/ERDiagram.png)
-
+![ER Diagram](https://raw.githubusercontent.com/JeffersonLab/epas/main/ERDiagram_deleted_plant.png)
 
 ## DDL
 
