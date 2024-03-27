@@ -19,8 +19,12 @@ class CreateIsolationPointsTable extends Migration
                 $table->unsignedInteger('plant_item_id');
                 $table->unsignedInteger('isolation_plant_item_id');
 
-                $table->foreign('plant_item_id')->references('id')->on('plant_items')->onDelete('cascade');
-                $table->foreign('isolation_plant_item_id')->references('id')->on('plant_items');
+                $table->foreign('plant_item_id')
+                    ->references('id')->on('plant_items')
+                    ->onDelete('cascade');
+                $table->foreign('isolation_plant_item_id')
+                    ->references('id')->on('plant_items')
+                    ->onDelete('cascade');
 
                 $table->unique(['plant_item_id', 'isolation_plant_item_id']);
 
