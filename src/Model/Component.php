@@ -46,4 +46,34 @@ class Component extends Model {
         return "HCO_COMPONENT_ID-{$this->component_id}";
     }
 
+    public function plantGroup() : string {
+        $facility = $this->system->category->facilityName();
+        switch ($facility) {
+            case 'Hall A'   :
+            case 'Hall B'   :
+            case 'Hall C'   :
+            case 'Hall D'   : return 'Physics';
+            case 'Cryo'     : return 'Engineering';
+            case 'Facilities' :return 'Facilities';
+            case 'LERF'     :
+            case 'UITF'     :
+            case 'CEBAF'    :
+            default         :    return 'Accelerator';
+        }
+    }
+
+    public function toPlantItem() : PlantItem{
+        $attributes = [
+            'plant_id' => $this->plantId(),
+            'plant_parent_id' => $this->plantParentId(),
+            'description' => $this->name,
+            'location' => $this->region->archi_loc ?: $this->region->name,
+            'plant_group' => $this->plantGroup(),
+            'plant_type' => $this->system->name,
+            'is_plant_item' => 1,
+            'data_source' => 'HCO',
+        ];
+        return new PlantItem($attributes);
+    }
+
 }
