@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Inertia\Inertia;
+use Jlab\Epas\Console\Commands\SyncWithHco;
 use Jlab\Epas\Console\Commands\UploadIsolationPoints;
 use Jlab\Epas\Console\Commands\UploadPlantItems;
 use Jlab\Epas\Http\Middleware\SetPlantItemRootView;
@@ -34,6 +35,7 @@ class EpasServiceProvider extends ServiceProvider
         $this->commands([
             UploadPlantItems::class,
             UploadIsolationPoints::class,
+            SyncWithHco::class,
         ]);
 
         $this->declarePolicies();

@@ -3,6 +3,7 @@
 namespace Jlab\Epas\Model;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -13,6 +14,15 @@ class Component extends Model {
     protected $table = 'srm_owner.component';
 
     protected $primaryKey = 'component_id';
+
+    // The attributes we care most about when syncing components to plant items
+    public $attributesOfConcern = [
+        'description',
+    //    'location',
+        'plant_group',
+        'plant_type',
+        'plant_parent_id'
+    ];
 
     public function system(): BelongsTo {
         return $this->belongsTo(System::class, 'system_id', 'system_id');
@@ -26,8 +36,13 @@ class Component extends Model {
         return PlantItem::where('plant_id', $this->plantId())->first();
     }
 
-    public function hasPlantItem(): bool {
-        return $this->plantItem() !== NULL;
+    public static function findByPlantId(string $plantId): ?Component {
+        $componentId = str_replace("HCO_COMPONENT_ID-", '', $plantId);
+        return Component::where('component_id', $componentId)->first();
+    }
+
+    public function existsInDatabase(): bool {
+        return PlantItem::where('plant_id', $this->plantId())->exists();
     }
 
     public function flatRegionPlantParentId() : string {
@@ -67,13 +82,27 @@ class Component extends Model {
             'plant_id' => $this->plantId(),
             'plant_parent_id' => $this->plantParentId(),
             'description' => $this->name,
-            'location' => $this->region->archi_loc ?: $this->region->name,
+            'location' => $this->region->name,
             'plant_group' => $this->plantGroup(),
             'plant_type' => $this->system->name,
             'is_plant_item' => 1,
             'data_source' => 'HCO',
         ];
         return new PlantItem($attributes);
+    }
+
+    public function matchesExistingPlantItem() {
+        return $this->existsInDatabase() &&  $this->matches($this->plantItem());
+    }
+
+    // Does this
+    public function matches(PlantItem $plantItem) : bool {
+        return $this->toPlantItem()->only($this->attributesOfConcern) == $plantItem->only($this->attributesOfConcern);
+    }
+
+    //
+    public function location() {
+
     }
 
 }
