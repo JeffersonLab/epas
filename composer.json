@@ -22,7 +22,8 @@
         "laravel/scout": "^10.6",
         "babenkoivan/elastic-scout-driver": "^3.1",
         "babenkoivan/elastic-scout-driver-plus": "^4.6",
-        "inertiajs/inertia-laravel": "^0.6.11"
+        "inertiajs/inertia-laravel": "^0.6.11",
+        "yajra/laravel-oci8": "^10.5"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",

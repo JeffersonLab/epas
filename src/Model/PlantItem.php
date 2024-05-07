@@ -14,7 +14,6 @@ class PlantItem extends BaseModel
 {
 
     use Searchable;
-    use SoftDeletes;
 
     /**
      * The attributes that should be cast.
