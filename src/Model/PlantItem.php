@@ -13,8 +13,7 @@ use Elastic\ScoutDriverPlus\Searchable;
 class PlantItem extends BaseModel
 {
 
-//    use Searchable;
-//    use SoftDeletes;
+    use Searchable;
 
     /**
      * The attributes that should be cast.
