@@ -11,24 +11,24 @@
     "homepage": "https://github.com/jlab/epas",
     "keywords": ["Laravel", "Epas"],
     "require": {
-        "illuminate/support": "^10.0",
-        "jlab/laravel-utilities": "^10.0",
+        "illuminate/support": "^11.0",
+        "jlab/laravel-utilities": "^11.0",
         "laravel/legacy-factories": "^1.1",
-        "tightenco/ziggy": "^1.1",
+        "tightenco/ziggy": "^1.1|^2.0",
         "maatwebsite/excel": "^3.1.50",
         "ext-pdo": "*",
-        "laravel/sail": "^1.19",
         "rap2hpoutre/fast-excel": "^5.3",
-        "laravel/scout": "^10.6",
-        "babenkoivan/elastic-scout-driver": "^3.1",
-        "babenkoivan/elastic-scout-driver-plus": "^4.6",
-        "inertiajs/inertia-laravel": "^0.6.11",
-        "yajra/laravel-oci8": "^10.5"
+        "inertiajs/inertia-laravel": "1.0.0",
+        "laravel/scout": "^10.11",
+        "babenkoivan/elastic-scout-driver": "^4.0",
+        "babenkoivan/elastic-scout-driver-plus": "^5.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.0",
-        "orchestra/testbench": "8.*",
-        "sti3bas/laravel-scout-array-driver": "^3.5"
+        "phpunit/phpunit": "^10.5",
+        "orchestra/testbench": "^9.8",
+        "sti3bas/laravel-scout-array-driver": "^4.1"
+
+
     },
     "autoload": {
         "psr-4": {

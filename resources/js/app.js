@@ -11,7 +11,7 @@ Vue.use(VueMeta);
 Vue.use(require('vue-moment'));
 
 // Vue.use(InertiaApp);
-import { createInertiaApp } from '@inertiajs/inertia-vue'
+import { createInertiaApp, Link } from '@inertiajs/inertia-vue'
 
 import { InertiaProgress } from '@inertiajs/progress'
 InertiaProgress.init({
@@ -43,10 +43,10 @@ Vue.mixin({ methods: { route }});
 const app = document.getElementById('app')
 
 createInertiaApp({
-    resolve: name => require(`./Pages/${name}`),
+    resolve: name => require(`./${name}`),
     setup({ el, App, props, plugin }) {
         Vue.use(plugin)
-
+        Vue.component('inertia-link', Link)
         new Vue({
             render: h => h(App, props),
         }).$mount(el)
