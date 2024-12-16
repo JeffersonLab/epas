@@ -28,7 +28,7 @@ class ComponentTest extends HcoTestCase {
         $this->assertEquals("HCO_COMPONENT_ID-11812", $item->plant_id);
         $this->assertEquals("999_ARC4", $item->plant_parent_id);
         $this->assertEquals("MJC4A18", $item->description);
-        $this->assertEquals("999_ARC4", $item->location);
+        $this->assertEquals("ARC4", $item->location);
         $this->assertEquals("Dipoles", $item->plant_type);
         $this->assertEquals( "HCO", $item->data_source);
     }
