@@ -21,7 +21,7 @@ class Component extends Model {
     //    'location',
         'plant_group',
         'plant_type',
-        'plant_parent_id'
+        'plant_parent_id',
     ];
 
     public function system(): BelongsTo {
@@ -98,6 +98,18 @@ class Component extends Model {
     // Does this
     public function matches(PlantItem $plantItem) : bool {
         return $this->toPlantItem()->only($this->attributesOfConcern) == $plantItem->only($this->attributesOfConcern);
+    }
+
+    public function getMismatchedAttributes() : array {
+        $hcoAttributes = $this->toPlantItem()->only($this->attributesOfConcern);
+        $epasAttributes = $this->plantItem()->only($this->attributesOfConcern);
+        $difference = [];
+        foreach ($hcoAttributes as $key => $value) {
+            if ($epasAttributes[$key] != $value) {
+                $difference[$key] = "{$epasAttributes[$key]} / {$value}";
+            }
+        }
+        return $difference;
     }
 
     //
