@@ -21,7 +21,7 @@ class Component extends Model {
     //    'location',
         'plant_group',
         'plant_type',
-        'plant_parent_id',
+    //    'plant_parent_id',
     ];
 
     public function system(): BelongsTo {
@@ -81,7 +81,7 @@ class Component extends Model {
         $attributes = [
             'plant_id' => $this->plantId(),
             'plant_parent_id' => $this->plantParentId(),
-            'description' => $this->name,
+            'description' => $this->description(),
             'location' => $this->region->name,
             'plant_group' => $this->plantGroup(),
             'plant_type' => $this->system->name,
@@ -89,6 +89,17 @@ class Component extends Model {
             'data_source' => 'HCO',
         ];
         return new PlantItem($attributes);
+    }
+
+    public function description() {
+        return "{$this->name} - {$this->epasSystemName()}";
+    }
+
+    public function epasSystemName(): string {
+        if (array_key_exists($this->system->name, config('epas.system_renames'))) {
+            return config('epas.system_renames')[$this->system->name];
+        }
+        return $this->system->name;
     }
 
     public function matchesExistingPlantItem() {

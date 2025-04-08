@@ -85,7 +85,24 @@ return [
     | Here you specify the list of valid Plant Groups that exist in ePAS
     |
     */
-    'plant_groups' => ['Accelerator', 'Engineering', 'Facilities', 'Physics']
+    'plant_groups' => ['Accelerator', 'Engineering', 'Facilities', 'Physics'],
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ePAS System Renaming
+    |--------------------------------------------------------------------------
+    |
+    | Here you specify a mapping of system names that appear to how the ePAS administrator
+    | wants to see them in ePAS.
+    |
+    */
+    'system_renames' => [
+        'Correctors (iron core)' => 'Corrector Magnet (Iron Core)',
+        'Correctors (air core)' => 'Corrector Magnet (Air Core)',
+        'Dipoles'  => 'Dipole Magnet',
+        'Quads'    => 'Quad Pole Magnet',
+    ],
 
 
 ];

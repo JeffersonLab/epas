@@ -55,7 +55,7 @@ class CompareWithHco extends Command{
             $this->progressBar = (php_sapi_name() == 'cli');  // not via web!
             // Inserts & Updates
             foreach ($this->epasSystems() as $system){
-                $this->line("Comparing $system...");
+                $this->line("Comparing $system->name...");
                 /** @var \Jlab\Epas\Model\Component $component */
                 foreach ($system->components as $component){
                     if (! $component->existsInDatabase()){
