@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\MessageBag;
 use Jlab\Epas\Model\PlantItem;
 use Jlab\Epas\Model\System;
+use Yajra\Pdo\Oci8\Exceptions\Oci8Exception;
 
 class SyncWithHco extends Command{
 
@@ -60,45 +61,57 @@ class SyncWithHco extends Command{
         try {
             $this->progressBar = (php_sapi_name() == 'cli');  // not via web!
             // Inserts & Updates
-            foreach ($this->epasSystems() as $system){
+            foreach ($this->epasSystems() as $system) {
                 /** @var \Jlab\Epas\Model\Component $component */
-                foreach ($system->components as $component){
-                    if (! $component->existsInDatabase()){
-                        Log::info('Adding ' . $component->name . ' to '. $component->plantParentId());
-                        $plantItem = $component->toPlantItem();
-                        if (! $plantItem->save()){
-                            $message = "Failed to save {$plantItem->plant_id} - {$plantItem->description}";
-                            $this->errors->add($plantItem->plant_id, $message);
-                            Log::error($message);
-                            Log::error($plantItem->errors()->toJson());
-                        }
-                        $inserts++;
-                    }else{
-                        if (! $component->matchesExistingPlantItem()){
-                            $existing = $component->plantItem();
-                            // Must update existing
-                            Log::info("Update {$existing->plant_id} with HCO changes");
-                            if (! $existing->update($component->toPlantItem()->only($component->attributesOfConcern))){
-                                $message = "Failed to update {$existing->plant_id}";
+                foreach ($system->components as $component) {
+                    try {
+                        if (!$component->existsInDatabase()) {
+                            Log::info('Adding ' . $component->name . ' to ' . $component->plantParentId());
+                            $plantItem = $component->toPlantItem();
+                            if (!$plantItem->save()) {
+                                $message = "Failed to save {$plantItem->plant_id} - {$plantItem->description}";
+                                $this->errors->add($plantItem->plant_id, $message);
                                 Log::error($message);
-                                $this->errors->add($existing->plant_id, $message);
+                                Log::error($plantItem->errors()->toJson());
                             }
-                            $updates++;
+                            $inserts++;
+                        }
+                        else {
+                            if (!$component->matchesExistingPlantItem()) {
+                                $existing = $component->plantItem();
+                                // Must update existing
+                                Log::info("Update {$existing->plant_id} with HCO changes");
+                                if (!$existing->update($component->toPlantItem()
+                                    ->only($component->attributesOfConcern))) {
+                                    $message = "Failed to update {$existing->plant_id}";
+                                    Log::error($message);
+                                    $this->errors->add($existing->plant_id, $message);
+                                }
+                                $updates++;
+                            }
+                        }
+                    }
+                    catch (Oci8Exception $e) {
+                        if ($e->getCode() == 2291) {   // Parent Key not found
+                            $this->error("Missing Parent Key");  // Report it but continue
+                        }
+                        else {
+                            throw $e;  // Some other DB error that needs attention
                         }
                     }
                 }
-            }
-            // Removals
-            foreach ($this->hcoPlantItems() as $plantItem){
-                $component = Component::findByPlantId($plantItem->plant_id);
-                if (! $component){
-                   Log::info("Must remove {$plantItem->plant_id} - {$plantItem->description}");
-                    if (! $plantItem->delete()){
-                        $message = "Failed to delete {$plantItem->plant_id} - {$plantItem->description}";
-                        Log::error($message);
-                        $this->errors->add($plantItem, $message);
+                // Removals
+                foreach ($this->hcoPlantItems() as $plantItem) {
+                    $component = Component::findByPlantId($plantItem->plant_id);
+                    if (!$component) {
+                        Log::info("Must remove {$plantItem->plant_id} - {$plantItem->description}");
+                        if (!$plantItem->delete()) {
+                            $message = "Failed to delete {$plantItem->plant_id} - {$plantItem->description}";
+                            Log::error($message);
+                            $this->errors->add($plantItem, $message);
+                        }
+                        $deletes++;
                     }
-                    $deletes++;
                 }
             }
         }catch (\Exception $e){
