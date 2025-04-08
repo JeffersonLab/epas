@@ -2,6 +2,8 @@
 
 A Laravel package for maintaining a master database of Jefferson Lab *Plant Items* which can be integrated with the ePAS application hosted for Jlab by Prometheus. 
 
+![Screen Shot](screenshot1.jpg)
+
 ## Installation
 
 Via Composer
